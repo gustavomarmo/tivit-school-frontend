@@ -1,0 +1,59 @@
+.topbar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    height: 70px;
+    background-color: var(--bg-secondary);
+    transition: background-color 1s ease, border-color 1s ease;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 5px 5px 5px grey;
+    margin: 0 20px;
+}
+
+.toggleBtn {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 10px;
+}
+
+.logoContainer img {
+    height: 40px;
+    width: auto;
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+.userProfile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.userPhoto {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.userName {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.logoutBtn {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 10px;
+}

@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    /* Cores da Marca */
+    --brand-primary: #f20024;
+    --brand-secondary: #d1001f;
+    --brand-text: #ffffff;
+
+    /* Tema Claro (Padrão) */
+    --bg-primary: #f4f7f6;
+    --text-primary: #262626;
+    --border-color: #929292;
+    --bg-secondary: #262626;
+    --text-secondary: #ffffff;
+    --bg-hover: var(--brand-primary);
+    
+    /* Ícones */
+    --icon-inactive: #929292;
+    --icon-active: #262626;
+}
+
+body.dark-mode {
+    --bg-primary: #1c1c1c;
+    --text-primary: #f4f7f6;
+    --border-color: #404040;
+    --bg-secondary: #262626;
+    --icon-active: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Montserrat", sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+}
+
+ul {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+html {
+    scroll-behavior: smooth;
+}
