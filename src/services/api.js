@@ -255,21 +255,27 @@ export async function getAvailableSubjects() {
 }
 
 
-/**
- * @returns {Promise<object>}
- */
-export async function getProfessorDashboardData() {
-    await simulateNetworkDelay(500);
-    
-    const kpis = {
-        mediaTurma: "7.8",
-        frequenciaTurma: "92%",
-        recuperacaoTurma: "5"
-    };
-    
-    const alunosAtencao = _mockProfessorAtencao;
-    
-    return Promise.resolve({ kpis, alunosAtencao });
+export async function getProfessorData() {
+    // Simulando um delay de rede
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve({
+                resumo: {
+                    totalTurmas: 5,
+                    totalAlunos: 150,
+                    mediaGeral: 7.2
+                },
+                proximasAulas: [
+                    { id: 1, turma: '3º Ano A', disciplina: 'Matemática', horario: '08:00' },
+                    { id: 2, turma: '2º Ano B', disciplina: 'Física', horario: '10:00' },
+                ],
+                alunosAtencao: [
+                    { id: 1, nome: 'Lucas Mendes', turma: '3º A', motivo: 'Nota baixa em 2 provas', risco: 'alto' },
+                    { id: 2, nome: 'Fernanda Souza', turma: '2º B', motivo: '3 faltas seguidas', risco: 'medio' }
+                ]
+            });
+        }, 500);
+    });
 }
 
 /**

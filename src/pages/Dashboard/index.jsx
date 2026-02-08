@@ -1,5 +1,6 @@
 import { useAuth } from '../../hooks/useAuth';
 import { DashboardAluno } from './DashboardAluno';
+import { DashboardProfessor } from './DashboardProfessor';
 
 export function Dashboard() {
     const { userRole } = useAuth();
@@ -9,7 +10,7 @@ export function Dashboard() {
     }
 
     if (userRole === 'professor') {
-        return <h1>Bem-vindo, Professor! (Dashboard em construção)</h1>;
+        return <DashboardProfessor />;
     }
 
     if (userRole === 'coordenador') {
