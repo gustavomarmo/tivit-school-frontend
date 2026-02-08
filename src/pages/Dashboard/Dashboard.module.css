@@ -143,3 +143,32 @@
             "noticias";
     }
 }
+
+.areaGrafico1 { grid-area: grafico1; }
+.areaGrafico2 { grid-area: grafico2; }
+
+.dashboardGridCoordinator {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: 2fr 1fr;
+    grid-template-areas:
+        "opcoes opcoes"
+        "grafico1 grafico2"; 
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.chartContainer {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .dashboardGridCoordinator {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "opcoes"
+            "grafico1"
+            "grafico2";
+    }
+}

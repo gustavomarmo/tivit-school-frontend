@@ -256,7 +256,6 @@ export async function getAvailableSubjects() {
 
 
 export async function getProfessorData() {
-    // Simulando um delay de rede
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve({
@@ -278,72 +277,26 @@ export async function getProfessorData() {
     });
 }
 
-/**
-
- * @returns {Promise<object>}
- */
-export async function getCoordenadorDashboardData() {
-    await simulateNetworkDelay(600);
-
-    const totalAlunos = _mockStudentData.length;
-    const totalProf = _mockTeacherData.length;
-    
-    let somaMedias = 0;
-    _mockBoletimData.forEach(row => {
-        const mediaBim1 = (row.n1_n1 + row.n1_n2 + row.n1_ativ) / 3;
-        const mediaBim2 = (row.n2_n1 + row.n2_n2 + row.n2_ativ) / 3;
-        somaMedias += (mediaBim1 + mediaBim2) / 2;
-    });
-    const mediaEscola = (somaMedias / _mockBoletimData.length).toFixed(1);
-
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    const proxSemana = new Date();
-    proxSemana.setDate(hoje.getDate() + 7);
-    proxSemana.setHours(23, 59, 59, 999);
-
-    let contagemEventos = 0;
-    let eventosFuturos = [];
-
-    for (const dateKey in _calendarEvents) {
-        const dataEvento = new Date(dateKey + "T00:00:00"); 
-        if (dataEvento >= hoje && dataEvento <= proxSemana) {
-            const numEventos = _calendarEvents[dateKey].length;
-            contagemEventos += numEventos;
-            
-            _calendarEvents[dateKey].forEach(titulo => {
-                 eventosFuturos.push({ 
-                    dataISO: dataEvento.toISOString(), 
-                    dia: String(dataEvento.getDate()).padStart(2, '0'),
-                    mes: String(dataEvento.getMonth() + 1).padStart(2, '0'),
-                    titulo: titulo 
-                });
+export async function getCoordinatorData() {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve({
+                resumo: {
+                    totalAlunos: 1250,
+                    totalProfessores: 45,
+                    turmasAtivas: 32
+                },
+                desempenhoPorMateria: {
+                    labels: ['Matemática', 'Português', 'História', 'Geografia', 'Ciências', 'Inglês'],
+                    medias: [6.5, 7.8, 8.2, 7.5, 7.0, 8.5]
+                },
+                statusAlunos: {
+                    labels: ['Aprovados', 'Em Recuperação', 'Reprovados'],
+                    quantidades: [850, 120, 30]
+                }
             });
-        }
-    }
-    
-    eventosFuturos.sort((a, b) => a.dataISO.localeCompare(b.dataISO));
-
-    const kpis = { totalAlunos, totalProf, mediaEscola, contagemEventos };
-
-    const materiasLabels = _mockBoletimData.map(row => row.materia);
-    const materiasMedias = _mockBoletimData.map(row => {
-        const mediaBim1 = (row.n1_n1 + row.n1_n2 + row.n1_ativ) / 3;
-        const mediaBim2 = (row.n2_n1 + row.n2_n2 + row.n2_ativ) / 3;
-        return ((mediaBim1 + mediaBim2) / 2).toFixed(1);
+        }, 800);
     });
-    const barChartData = { labels: materiasLabels, data: materiasMedias };
-
-    const contagemTurmas = {};
-    _mockStudentData.forEach(aluno => {
-        contagemTurmas[aluno.turma] = (contagemTurmas[aluno.turma] || 0) + 1;
-    });
-    const pieChartData = {
-        labels: Object.keys(contagemTurmas),
-        data: Object.values(contagemTurmas)
-    };
-
-    return Promise.resolve({ kpis, barChartData, pieChartData, proximosEventos: eventosFuturos });
 }
 
 const _mockMateriasContent = {
