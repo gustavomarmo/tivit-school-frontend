@@ -3,14 +3,13 @@ import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
 import { Login } from './pages/Login';
+import { Alunos } from './pages/Alunos';
 import { useContext } from 'react';
 
 function PrivateRoute({ children }) {
   const { userRole } = useContext(AuthContext);
   return userRole ? children : <Navigate to="/login" />;
 }
-
-function Alunos() { return <h1>Página de Alunos (Em construção)</h1>; }
 
 function App() {
   return (
