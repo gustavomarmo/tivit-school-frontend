@@ -178,12 +178,22 @@ export async function deleteTeacher(teacherId) {
     return Promise.resolve(true);
 }
 
-/**
- * @returns {Promise<object>}
- */
 export async function getCalendarEvents() {
-    await simulateNetworkDelay(100);
-    return Promise.resolve(_calendarEvents);
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            
+            resolve({
+                [`${year}-${month}-05`]: ['Entrega de Trabalho'],
+                [`${year}-${month}-12`]: ['Prova de Matemática'],
+                [`${year}-${month}-15`]: ['Feriado Escolar'],
+                [`${year}-${month}-20`]: ['Reunião de Pais', 'Conselho de Classe'],
+                [`${year}-${month}-25`]: ['Feira de Ciências']
+            });
+        }, 300);
+    });
 }
 
 /**

@@ -2,9 +2,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
+import { Calendario } from './pages/Calendario';
 import { Login } from './pages/Login';
 import { Alunos } from './pages/Alunos';
 import { useContext } from 'react';
+
 
 function PrivateRoute({ children }) {
   const { userRole } = useContext(AuthContext);
@@ -25,6 +27,7 @@ function App() {
           }>
             <Route index element={<Dashboard />} />
             <Route path="alunos" element={<Alunos />} />
+            <Route path="calendario" element={<Calendario />} />
           </Route>
 
         </Routes>

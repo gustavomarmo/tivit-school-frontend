@@ -1,0 +1,42 @@
+.container {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.monthTitle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+.calendarGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.weekDay {
+    text-align: center;
+    font-weight: bold;
+    color: var(--icon-inactive);
+    padding: 10px 0;
+}
+
+/* Responsividade da Grid */
+@media (max-width: 768px) {
+    .calendarGrid {
+        gap: 5px;
+    }
+}
