@@ -17,12 +17,10 @@ let _mockStudentData = [
     { matricula: "2025007", nome: "Gabriela Dias", turma: "7º Ano C", status: "Ativo" },
 ];
 
-let _mockTeacherData = [
-    { matricula: "P1001", nome: "Marcos Andrade", disciplina: "Matemática", status: "Ativo" },
-    { matricula: "P1002", nome: "Lúcia Pereira", disciplina: "Português", status: "Ativo" },
-    { matricula: "P1003", nome: "Roberto Freitas", disciplina: "História", status: "Ativo" },
-    { matricula: "P1004", nome: "Sandra Gomes", disciplina: "Ciências", status: "Licença" },
-    { matricula: "P1005", nome: "Ricardo Oliveira", disciplina: "Educação Física", status: "Ativo" },
+let professoresMock = [
+    { matricula: 'P001', nome: 'Roberto Carlos', disciplina: 'Matemática', status: 'Ativo' },
+    { matricula: 'P002', nome: 'Ana Maria', disciplina: 'Português', status: 'Ativo' },
+    { matricula: 'P003', nome: 'Cláudio Santos', disciplina: 'História', status: 'Inativo' },
 ];
 
 const _mockBoletimData = [
@@ -134,48 +132,28 @@ export async function deleteStudent(studentId) {
     return Promise.resolve(true);
 }
 
-/**
- * @param {string} filter
- * @returns {Promise<Array>}
- */
-export async function getTeachers(filter = '') {
-    await simulateNetworkDelay(250);
-    
-    const lowerCaseFilter = filter.toLowerCase();
-    
-    const filteredData = _mockTeacherData.filter(teacher => {
-        return (
-            teacher.nome.toLowerCase().includes(lowerCaseFilter) ||
-            teacher.disciplina.toLowerCase().includes(lowerCaseFilter) ||
-            teacher.matricula.toLowerCase().includes(lowerCaseFilter)
-        );
+export async function getTeachers() {
+    return new Promise(resolve => {
+        setTimeout(() => resolve(professoresMock), 300);
     });
-    
-    return Promise.resolve(filteredData);
 }
 
-/**
- * @param {object} teacherData
- * @returns {Promise<object>}
- */
-export async function addTeacher(teacherData) {
-    await simulateNetworkDelay(500);
-    
-    _mockTeacherData.push(teacherData);
-    
-    return Promise.resolve(teacherData);
+export async function addTeacher(teacher) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            professoresMock.push(teacher);
+            resolve(teacher);
+        }, 300);
+    });
 }
 
-/**
- * @param {string} teacherId
- * @returns {Promise<boolean>}
- */
-export async function deleteTeacher(teacherId) {
-    await simulateNetworkDelay(400);
-    
-    _mockTeacherData = _mockTeacherData.filter(teacher => teacher.matricula !== teacherId);
-    
-    return Promise.resolve(true);
+export async function deleteTeacher(matricula) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            professoresMock = professoresMock.filter(t => t.matricula !== matricula);
+            resolve();
+        }, 300);
+    });
 }
 
 export async function getCalendarEvents() {
