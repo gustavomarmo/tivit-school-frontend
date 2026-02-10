@@ -444,13 +444,34 @@ const _mockExtraContent = {
 };
 
 export async function getSubjectsList() {
-    await simulateNetworkDelay(200);
-    return Promise.resolve(Object.keys(_mockMateriasContent));
+    return new Promise(resolve => {
+        setTimeout(() => resolve([
+            "Matemática", "Português", "História", "Geografia", "Ciências", "Inglês"
+        ]), 300);
+    });
 }
 
 export async function getSubjectContent(subjectName) {
-    await simulateNetworkDelay(300);
-    return Promise.resolve(_mockMateriasContent[subjectName] || []);
+    return new Promise(resolve => {
+        setTimeout(() => resolve([
+            {
+                id: 1,
+                titulo: "1º Bimestre: Conceitos Fundamentais",
+                itens: [
+                    { id: 101, type: 'file', nome: 'Apostila Teórica', desc: 'PDF com resumo do capítulo 1', url: '#' },
+                    { id: 102, type: 'link', nome: 'Vídeo Aula: Introdução', desc: 'Explicação do professor no YouTube', url: '#' },
+                ]
+            },
+            {
+                id: 2,
+                titulo: "2º Bimestre: Aprofundamento",
+                itens: [
+                    { id: 201, type: 'assignment', nome: 'Lista de Exercícios 1', desc: 'Resolver exercícios 1 ao 10', status: 'Pendente' },
+                    { id: 202, type: 'file', nome: 'Slides da Aula', desc: 'Material de apoio', url: '#' },
+                ]
+            }
+        ]), 500);
+    });
 }
 
 export async function uploadStudentAssignment(assignmentId, file) {

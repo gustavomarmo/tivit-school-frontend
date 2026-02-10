@@ -3,6 +3,7 @@ import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
 import { Calendario } from './pages/Calendario';
+import { Materias } from './pages/Materias';
 import { Login } from './pages/Login';
 import { Alunos } from './pages/Alunos';
 import { useContext } from 'react';
@@ -28,6 +29,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="alunos" element={<Alunos />} />
             <Route path="calendario" element={<Calendario />} />
+            <Route path="materias" element={<Materias />} />
           </Route>
 
         </Routes>
