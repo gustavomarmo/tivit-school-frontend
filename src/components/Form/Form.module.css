@@ -1,0 +1,28 @@
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.label {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.control {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+}
+
+.control:focus {
+    border-color: var(--brand-primary);
+}
