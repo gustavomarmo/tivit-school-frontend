@@ -1,0 +1,106 @@
+/* src/pages/Login/Login.module.css */
+
+.loginContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--brand-primary);
+    padding: 20px;
+}
+
+.loginBox {
+    background-color: var(--bg-primary);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.logoContainer img {
+    height: 60px;
+    margin-bottom: 20px;
+}
+
+.loginBox h2 {
+    color: var(--text-primary);
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+}
+
+.inputGroup {
+    position: relative;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.inputGroup label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.inputWrapper {
+    position: relative;
+}
+
+.inputWrapper i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--icon-inactive);
+}
+
+.inputWrapper input {
+    width: 100%;
+    padding: 12px 15px 12px 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.inputWrapper input:focus {
+    border-color: var(--brand-primary);
+}
+
+.btnLogin {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--brand-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.btnLogin:hover {
+    background-color: var(--brand-secondary);
+}
+
+.errorMessage {
+    background-color: #ffcccc;
+    color: #cc0000;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
