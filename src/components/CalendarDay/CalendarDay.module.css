@@ -1,0 +1,73 @@
+.container {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    min-height: 100px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    cursor: pointer;
+    height: 100%;
+}
+
+.container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-color: var(--brand-primary);
+}
+
+.dayNumber {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+}
+
+.otherMonth {
+    opacity: 0.5;
+    background-color: rgba(0,0,0,0.02);
+    cursor: default;
+}
+.otherMonth:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--border-color);
+}
+
+.today {
+    border: 2px solid var(--brand-primary);
+    background-color: rgba(242, 0, 36, 0.05);
+}
+
+.today .dayNumber {
+    color: var(--brand-primary);
+}
+
+.eventList {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-grow: 1;
+}
+
+.eventItem {
+    background-color: var(--brand-primary);
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+    .container {
+        min-height: 60px;
+        padding: 5px;
+    }
+    .eventItem {
+        font-size: 0.6rem;
+        padding: 1px 3px;
+    }
+}
