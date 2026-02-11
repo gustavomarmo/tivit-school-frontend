@@ -19,10 +19,6 @@ export function DashboardAluno() {
                         <i className="fa-solid fa-chart-simple"></i>
                         <span>Boletim</span>
                     </Link>
-                    <Link to="/extracurricular" className={styles.opcaoItem}>
-                        <i className="fa-solid fa-shapes"></i>
-                        <span>Extracurricular</span>
-                    </Link>
                     <Link to="#" className={styles.opcaoItem}>
                         <i className="fa-solid fa-person-running"></i>
                         <span>Saída</span>

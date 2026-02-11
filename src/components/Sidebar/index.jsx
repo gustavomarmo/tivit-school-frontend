@@ -11,7 +11,6 @@ export function Sidebar({ isOpen }) {
         { path: '/calendario', icon: 'fa-solid fa-calendar', text: 'Calendário', roles: ['aluno', 'professor', 'coordenador'] },
         { path: '/materias', icon: 'fa-solid fa-folder-open', text: 'Matérias', roles: ['aluno', 'professor'] },
         { path: '/boletim', icon: 'fa-solid fa-chart-simple', text: 'Boletim', roles: ['aluno'] },
-        { path: '/extracurricular', icon: 'fa-solid fa-shapes', text: 'Extracurricular', roles: ['aluno'] },
         { path: '/frequencia', icon: 'fa-solid fa-list-check', text: 'Frequência', roles: ['professor'] },
         { path: '/notas', icon: 'fa-solid fa-pen-to-square', text: 'Lançar Notas', roles: ['professor'] },
         { path: '/alunos', icon: 'fa-solid fa-person', text: 'Alunos', roles: ['coordenador'] },
