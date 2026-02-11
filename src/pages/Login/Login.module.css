@@ -104,3 +104,10 @@
     margin-bottom: 15px;
     font-size: 0.9rem;
 }
+
+.themeBtnContainer {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}

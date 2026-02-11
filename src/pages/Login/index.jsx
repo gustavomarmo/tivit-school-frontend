@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import styles from './Login.module.css';
+import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import logo from '../../assets/images/Logo Edu Connect.png';
 
 export function Login() {
@@ -30,6 +31,11 @@ export function Login() {
 
     return (
         <div className={styles.loginContainer}>
+
+            <div className={styles.themeBtnContainer}>
+                <ThemeSwitcher />
+            </div>
+
             <div className={styles.loginBox}>
                 <div className={styles.logoContainer}>
                     <img src={logo} alt="Edu Connect" />
