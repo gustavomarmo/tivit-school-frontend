@@ -7,6 +7,7 @@ import { Materias } from './pages/Materias';
 import { Login } from './pages/Login';
 import { Alunos } from './pages/Alunos';
 import { Professores } from './pages/Professores';
+import { Boletim } from './pages/Boletim';
 import { useContext } from 'react';
 
 
@@ -32,6 +33,7 @@ function App() {
             <Route path="calendario" element={<Calendario />} />
             <Route path="materias" element={<Materias />} />
             <Route path="professores" element={<Professores />} />
+            <Route path="boletim" element={<Boletim />} />
           </Route>
 
         </Routes>

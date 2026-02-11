@@ -23,16 +23,6 @@ let professoresMock = [
     { matricula: 'P003', nome: 'Cláudio Santos', disciplina: 'História', status: 'Inativo' },
 ];
 
-const _mockBoletimData = [
-    { materia: 'Matemática', n1_n1: 8.0, n1_n2: 7.5, n1_ativ: 9.0, n2_n1: 8.5, n2_n2: 8.0, n2_ativ: 9.0 },
-    { materia: 'Português', n1_n1: 9.5, n1_n2: 8.5, n1_ativ: 9.0, n2_n1: 9.0, n2_n2: 9.5, n2_ativ: 10.0 },
-    { materia: 'História', n1_n1: 7.0, n1_n2: 7.0, n1_ativ: 8.0, n2_n1: 7.5, n2_n2: 7.0, n2_ativ: 7.5 },
-    { materia: 'Geografia', n1_n1: 8.5, n1_n2: 8.0, n1_ativ: 8.0, n2_n1: 8.0, n2_n2: 8.0, n2_ativ: 8.5 },
-    { materia: 'Ciências', n1_n1: 9.0, n1_n2: 9.5, n1_ativ: 9.0, n2_n1: 9.0, n2_n2: 9.0, n2_ativ: 9.5 },
-    { materia: 'Inglês', n1_n1: 10.0, n1_n2: 10.0, n1_ativ: 10.0, n2_n1: 10.0, n2_n2: 10.0, n2_ativ: 10.0 },
-    { materia: 'Educação Física', n1_n1: 10.0, n1_n2: 10.0, n1_ativ: 10.0, n2_n1: 10.0, n2_n2: 10.0, n2_ativ: 10.0 },
-];
-
 const _mockAbsenceData = [
     { materia: 'Matemática', frequencia: "95%", faltas: 6 },
     { materia: 'Português', frequencia: "98%", faltas: 3 },
@@ -42,11 +32,6 @@ const _mockAbsenceData = [
     { materia: 'Inglês', frequencia: "100%", faltas: 0 },
 ];
 
-const _mockProfessorAtencao = [
-    { nome: "Beatriz Lima", turma: "8º Ano B", media: 6.8, frequencia: "80%" },
-    { nome: "Daniel Costa", turma: "9º Ano A", media: 5.5, frequencia: "85%" },
-    { nome: "Fernando Alves", turma: "7º Ano C", media: 7.0, frequencia: "75%" },
-];
 
 let _mockNotifications = [
     {
@@ -192,12 +177,16 @@ export async function saveCalendarEvent(date, title) {
     return Promise.resolve(true);
 }
 
-/**
- * @returns {Promise<Array>}
- */
-export async function getBoletimData() {
-    await simulateNetworkDelay(400);
-    return Promise.resolve(_mockBoletimData);
+export async function getStudentGrades() {
+    return new Promise(resolve => {
+        setTimeout(() => resolve([
+            { materia: 'Matemática', n1_n1: 8.0, n1_n2: 7.5, n1_ativ: 9.0, n2_n1: 6.5, n2_n2: 7.0, n2_ativ: 8.0 },
+            { materia: 'Português', n1_n1: 9.0, n1_n2: 8.5, n1_ativ: 10.0, n2_n1: 9.0, n2_n2: 9.5, n2_ativ: 9.0 },
+            { materia: 'História', n1_n1: 7.0, n1_n2: 6.5, n1_ativ: 8.0, n2_n1: 7.5, n2_n2: 8.0, n2_ativ: 7.0 },
+            { materia: 'Geografia', n1_n1: 8.5, n1_n2: 8.0, n1_ativ: 9.0, n2_n1: 8.0, n2_n2: 7.5, n2_ativ: 8.5 },
+            { materia: 'Ciências', n1_n1: 6.0, n1_n2: 5.5, n1_ativ: 7.0, n2_n1: 7.0, n2_n2: 6.5, n2_ativ: 8.0 },
+        ]), 400);
+    });
 }
 
 /**
@@ -615,26 +604,6 @@ export async function getTurmasList() {
     await simulateNetworkDelay(200);
     const turmas = [...new Set(_mockStudentData.map(s => s.turma))].sort();
     return Promise.resolve(turmas);
-}
-
-/**
- */
-export async function getStudentsGrades(turma, materia, bimestre) {
-    await simulateNetworkDelay(400);
-
-    const alunosDaTurma = _mockStudentData.filter(s => s.turma === turma && s.status === 'Ativo');
-
-    const dados = alunosDaTurma.map(aluno => {
-        return {
-            matricula: aluno.matricula,
-            nome: aluno.nome,
-            n1: (Math.random() * 10).toFixed(1),
-            n2: (Math.random() * 10).toFixed(1),
-            ativ: (Math.random() * 10).toFixed(1)
-        };
-    });
-
-    return Promise.resolve(dados);
 }
 
 /**

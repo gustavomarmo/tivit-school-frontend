@@ -1,0 +1,25 @@
+.container {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mediaHighlight {
+    font-weight: bold;
+    color: var(--text-primary);
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.aprovado { color: #27ae60; }
+.reprovado { color: #c0392b; }
+.recuperacao { color: #f39c12; }
+
+.headerGroup {
+    text-align: center !important;
+    border-bottom: 2px solid var(--border-color);
+    background-color: var(--bg-hover);
+    color: white;
+}
