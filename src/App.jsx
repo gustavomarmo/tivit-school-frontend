@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
 import { Calendario } from './pages/Calendario';
@@ -20,29 +21,31 @@ function PrivateRoute({ children }) {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
 
-          <Route path="/" element={
-            <PrivateRoute>
-              <MainLayout />
-            </PrivateRoute>
-          }>
-            <Route index element={<Dashboard />} />
-            <Route path="alunos" element={<Alunos />} />
-            <Route path="calendario" element={<Calendario />} />
-            <Route path="materias" element={<Materias />} />
-            <Route path="professores" element={<Professores />} />
-            <Route path="boletim" element={<Boletim />} />
-            <Route path="frequencia" element={<Frequencia />} />
-            <Route path="notas" element={<Notas />} />
-          </Route>
+            <Route path="/" element={
+              <PrivateRoute>
+                <MainLayout />
+              </PrivateRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="alunos" element={<Alunos />} />
+              <Route path="calendario" element={<Calendario />} />
+              <Route path="materias" element={<Materias />} />
+              <Route path="professores" element={<Professores />} />
+              <Route path="boletim" element={<Boletim />} />
+              <Route path="frequencia" element={<Frequencia />} />
+              <Route path="notas" element={<Notas />} />
+            </Route>
 
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

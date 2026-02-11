@@ -1,5 +1,6 @@
 import { useAuth } from '../../hooks/useAuth';
 import styles from './Topbar.module.css';
+import { ThemeSwitcher } from '../ThemeSwitcher';
 import logo from '../../assets/images/Logo Edu Connect.png';
 import userPhoto from '../../assets/images/IMG_8792.jpg';
 
@@ -17,6 +18,8 @@ export function Topbar({ onToggleSidebar }) {
             </div>
 
             <div className={styles.spacer}></div>
+
+            <ThemeSwitcher />
 
             <div className={styles.userProfile}>
                 <img src={userPhoto} alt="User" className={styles.userPhoto} />
