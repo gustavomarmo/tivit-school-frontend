@@ -9,6 +9,7 @@ import { Alunos } from './pages/Alunos';
 import { Professores } from './pages/Professores';
 import { Boletim } from './pages/Boletim';
 import { Frequencia } from './pages/Frequencia';
+import { Notas } from './pages/Notas';
 import { useContext } from 'react';
 
 
@@ -36,6 +37,7 @@ function App() {
             <Route path="professores" element={<Professores />} />
             <Route path="boletim" element={<Boletim />} />
             <Route path="frequencia" element={<Frequencia />} />
+            <Route path="notas" element={<Notas />} />
           </Route>
 
         </Routes>

@@ -619,12 +619,9 @@ export async function getTurmasList() {
     return Promise.resolve(turmas);
 }
 
-/**
- * @param {object} payload
- */
 export async function saveGrades(payload) {
-    await simulateNetworkDelay(800);
-    console.log("Payload recebido no Backend:", payload);
-    
-    return Promise.resolve(true);
+    return new Promise(resolve => {
+        console.log("Notas salvas:", payload);
+        setTimeout(() => resolve({ success: true }), 600);
+    });
 }

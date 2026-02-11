@@ -1,0 +1,54 @@
+.container {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.filterGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: end;
+    margin-bottom: 20px;
+}
+
+.searchBar {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.gradeInput {
+    width: 50px;
+    padding: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    text-align: center;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+}
+
+.gradeInput:focus {
+    border-color: var(--brand-primary);
+    outline: none;
+    background-color: rgba(242, 0, 36, 0.05);
+}
+
+.bimesterLabel {
+    font-size: 0.75rem;
+    color: #666;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
