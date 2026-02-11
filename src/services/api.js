@@ -197,6 +197,19 @@ export async function getAbsenceData() {
     return Promise.resolve(_mockAbsenceData);
 }
 
+export async function getClasses() {
+    return new Promise(resolve => {
+        setTimeout(() => resolve(['9º Ano A', '9º Ano B', '1º Ano EM', '2º Ano EM', '3º Ano EM']), 200);
+    });
+}
+
+export async function saveAttendance(payload) {
+    return new Promise(resolve => {
+        console.log("Frequência enviada:", payload);
+        setTimeout(() => resolve({ success: true }), 500);
+    });
+}
+
 /**
  * @param {string} selectedSubject
  * @returns {Promise<object>}

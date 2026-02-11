@@ -1,0 +1,48 @@
+.container {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.filterGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: end;
+}
+
+.checkboxContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--brand-primary);
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+.statusPresente {
+    color: #27ae60;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.statusAusente {
+    color: #c0392b;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
