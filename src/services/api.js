@@ -477,27 +477,11 @@ export async function addTopicToSubject(subjectName, topicTitle) {
     return Promise.resolve(newTopic);
 }
 
-export async function addMaterialToSubject(subjectName, topicId, materialData) {
-    await simulateNetworkDelay(500);
-    
-    const subjectModules = _mockMateriasContent[subjectName];
-    if (!subjectModules) return Promise.reject("Matéria não encontrada");
-
-    const topic = subjectModules.find(m => m.id === Number(topicId));
-    
-    if (topic) {
-        topic.itens.push({
-            id: Date.now(),
-            type: materialData.type,
-            nome: materialData.nome,
-            desc: materialData.desc,
-            url: materialData.url,
-            status: materialData.type === 'assignment' ? 'Pendente' : undefined
-        });
-        return Promise.resolve(true);
-    }
-    
-    return Promise.reject("Tópico não encontrado");
+export async function addSubjectResource(materia, moduloId, recurso) {
+    return new Promise(resolve => {
+        console.log(`Salvando em [${materia}], Módulo [${moduloId}]:`, recurso);
+        setTimeout(() => resolve({ success: true }), 800);
+    });
 }
 
 export async function getExtraList() {
