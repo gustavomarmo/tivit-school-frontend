@@ -3,6 +3,7 @@ import styles from './Topbar.module.css';
 import { ThemeSwitcher } from '../ThemeSwitcher';
 import logo from '../../assets/images/Logo Edu Connect.png';
 import userPhoto from '../../assets/images/IMG_8792.jpg';
+import { NotificationBell } from '../NotificationBell';
 
 export function Topbar({ onToggleSidebar }) {
     const { user, logout } = useAuth();
@@ -19,6 +20,7 @@ export function Topbar({ onToggleSidebar }) {
 
             <div className={styles.spacer}></div>
 
+            <NotificationBell />
             <ThemeSwitcher />
 
             <div className={styles.userProfile}>
