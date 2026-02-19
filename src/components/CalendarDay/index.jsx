@@ -1,6 +1,6 @@
 import styles from './CalendarDay.module.css';
 
-export function CalendarDay({ day, type = 'current', isToday = false, events = [], onClick }) {
+export function CalendarDay({ day, type = 'current', isToday = false, events = [], onClick, onEventClick }) {
     
     return (
         <div 
