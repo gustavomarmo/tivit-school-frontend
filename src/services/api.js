@@ -177,6 +177,34 @@ export async function saveCalendarEvent(date, title) {
     return Promise.resolve(true);
 }
 
+export async function deleteCalendarEvent(date, title) {
+    await simulateNetworkDelay(300);
+
+    if (_calendarEvents[date]) {
+        _calendarEvents[date] = _calendarEvents[date].filter(t => t !== title);
+        if (_calendarEvents[date].length === 0) {
+            delete _calendarEvents[date];
+        }
+        localStorage.setItem('calendarEvents', JSON.stringify(_calendarEvents));
+    }
+
+    return Promise.resolve(true);
+}
+
+export async function updateCalendarEvent(date, oldTitle, newTitle) {
+    await simulateNetworkDelay(300);
+
+    if (_calendarEvents[date]) {
+        const index = _calendarEvents[date].indexOf(oldTitle);
+        if (index > -1) {
+            _calendarEvents[date][index] = newTitle;
+            localStorage.setItem('calendarEvents', JSON.stringify(_calendarEvents));
+        }
+    }
+
+    return Promise.resolve(true);
+}
+
 export async function getStudentGrades() {
     return new Promise(resolve => {
         setTimeout(() => resolve([
