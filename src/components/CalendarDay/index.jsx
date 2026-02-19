@@ -15,7 +15,7 @@ export function CalendarDay({ day, type = 'current', isToday = false, events = [
             
             <div className={styles.eventList}>
                 {events.map((evt, idx) => (
-                    <div key={idx} className={styles.eventItem} title={evt}>
+                    <div key={idx} className={styles.eventItem} title={evt} onClick={e => {e.stopPropagation(); onEventClick?.(evt);}}>
                         {evt}
                     </div>
                 ))}
