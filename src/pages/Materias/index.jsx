@@ -192,7 +192,7 @@ export function Materias() {
                             <div key={module.id} className={styles.moduleBlock}>
                                 <h3 className={styles.moduleTitle}>
                                     <i className="fa-solid fa-caret-down"></i>
-                                    <span style={{ flex: 1 }}>{module.titulo}</span>
+                                    <span>{module.titulo}</span>
 
                                     {isProfessor && (
                                         <span style={{ display: 'inline-flex', gap: '2px', marginLeft: '8px' }}>
