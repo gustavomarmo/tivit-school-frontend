@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getSubjectsList, getSubjectContent, addSubjectResource } from '../../services/api';
+import { getSubjectsList, getSubjectContent, addSubjectResource, addTopicToSubject } from '../../services/api';
 import { useAuth } from '../../hooks/useAuth';
 import { ResourceItem } from '../../components/ResourceItem';
 import { Button } from '../../components/Button';
@@ -23,6 +23,10 @@ export function Materias() {
         desc: '',
         url: ''
     });
+
+    const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
+    const [newTopicTitle, setNewTopicTitle] = useState('');
+    const [savingTopic, setSavingTopic] = useState(false);
 
     const [viewContent, setViewContent] = useState(null);
 
@@ -62,6 +66,24 @@ export function Materias() {
         carregarConteudo();
     }
 
+    async function handleAddTopic(e) {
+        e.preventDefault();
+        if (!newTopicTitle.trim()) return;
+
+        setSavingTopic(true);
+        try {
+            await addTopicToSubject(selectedSubject, newTopicTitle.trim());
+            setIsTopicModalOpen(false);
+            setNewTopicTitle('');
+            carregarConteudo();
+        } catch (err) {
+            console.error("Erro ao criar tópico:", err);
+            alert("Erro ao criar tópico. Tente novamente.");
+        } finally {
+            setSavingTopic(false);
+        }
+    }
+
     function handleOpenResource(item) {
         setViewContent(item);
     }
@@ -85,9 +107,19 @@ export function Materias() {
                     <h1>{selectedSubject}</h1>
                     
                     {(userRole === 'professor' || userRole === 'coordenador') && (
-                        <Button onClick={() => setIsModalOpen(true)}>
-                            <i className="fa-solid fa-plus"></i> Nova Atividade
-                        </Button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <Button
+                                variant="secondary"
+                                onClick={() => setIsTopicModalOpen(true)}
+                                style={{ border: '1px solid var(--brand-primary)', color: 'var(--brand-primary)', background: 'transparent' }}
+                            >
+                                <i className="fa-solid fa-folder-plus"></i> Novo Tópico
+                            </Button>
+
+                            <Button onClick={() => setIsModalOpen(true)}>
+                                <i className="fa-solid fa-plus"></i> Nova Atividade
+                            </Button>
+                        </div>
                     )}
                 </div>
 
@@ -179,6 +211,40 @@ export function Materias() {
                     </div>
                 </form>
             </Modal>
+
+            <Modal
+                isOpen={isTopicModalOpen}
+                onClose={() => { setIsTopicModalOpen(false); setNewTopicTitle(''); }}
+                title="Criar Novo Tópico"
+            >
+                <form onSubmit={handleAddTopic}>
+                    <div style={{ display: 'grid', gap: '15px' }}>
+                        <Input
+                            label="Título do Tópico"
+                            placeholder="Ex: 1º Bimestre: Introdução à Álgebra"
+                            required
+                            autoFocus
+                            value={newTopicTitle}
+                            onChange={e => setNewTopicTitle(e.target.value)}
+                        />
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                            <Button
+                                type="button"
+                                variant="icon"
+                                onClick={() => { setIsTopicModalOpen(false); setNewTopicTitle(''); }}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button type="submit" disabled={savingTopic}>
+                                <i className="fa-solid fa-folder-plus"></i>
+                                {savingTopic ? 'Criando...' : 'Criar Tópico'}
+                            </Button>
+                        </div>
+                    </div>
+                </form>
+            </Modal>
+
             {viewContent && (
                 <Modal 
                     isOpen={!!viewContent} 
