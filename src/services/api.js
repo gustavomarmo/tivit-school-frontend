@@ -492,6 +492,29 @@ export async function addTopicToSubject(subjectName, topicTitle) {
     return Promise.resolve(newTopic);
 }
 
+export async function editTopicFromSubject(subjectName, topicId, newTitle) {
+    await simulateNetworkDelay(400);
+
+    const topic = (_mockMateriasContent[subjectName] || []).find(m => m.id === Number(topicId));
+    if (!topic) return Promise.reject("Tópico não encontrado");
+
+    topic.titulo = newTitle;
+    return Promise.resolve(true);
+}
+
+export async function deleteTopicFromSubject(subjectName, topicId) {
+    await simulateNetworkDelay(400);
+
+    if (!_mockMateriasContent[subjectName]) return Promise.reject("Matéria não encontrada");
+
+    const before = _mockMateriasContent[subjectName].length;
+    _mockMateriasContent[subjectName] = _mockMateriasContent[subjectName].filter(m => m.id !== Number(topicId));
+
+    return _mockMateriasContent[subjectName].length < before
+        ? Promise.resolve(true)
+        : Promise.reject("Tópico não encontrado");
+}
+
 export async function addSubjectResource(materia, moduloId, recurso) {
     await simulateNetworkDelay(800);
 
