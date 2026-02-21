@@ -382,6 +382,11 @@ const _mockMateriasContent = {
     ]
 };
 
+const _defaultSubjects = ["Matemática", "Português", "História", "Geografia", "Ciências", "Inglês"];
+_defaultSubjects.forEach(s => {
+    if (!_mockMateriasContent[s]) _mockMateriasContent[s] = [];
+});
+
 const _mockExtraContent = {
     "Robótica": [
         {
@@ -460,26 +465,8 @@ export async function getSubjectsList() {
 }
 
 export async function getSubjectContent(subjectName) {
-    return new Promise(resolve => {
-        setTimeout(() => resolve([
-            {
-                id: 1,
-                titulo: "1º Bimestre: Conceitos Fundamentais",
-                itens: [
-                    { id: 101, type: 'file', nome: 'Apostila Teórica', desc: 'PDF com resumo do capítulo 1', url: '#' },
-                    { id: 102, type: 'link', nome: 'Vídeo Aula: Introdução', desc: 'Explicação do professor no YouTube', url: '#' },
-                ]
-            },
-            {
-                id: 2,
-                titulo: "2º Bimestre: Aprofundamento",
-                itens: [
-                    { id: 201, type: 'assignment', nome: 'Lista de Exercícios 1', desc: 'Resolver exercícios 1 ao 10', status: 'Pendente' },
-                    { id: 202, type: 'file', nome: 'Slides da Aula', desc: 'Material de apoio', url: '#' },
-                ]
-            }
-        ]), 500);
-    });
+    await simulateNetworkDelay(300);
+    return Promise.resolve(_mockMateriasContent[subjectName] || []);
 }
 
 export async function uploadStudentAssignment(assignmentId, file) {
@@ -506,10 +493,25 @@ export async function addTopicToSubject(subjectName, topicTitle) {
 }
 
 export async function addSubjectResource(materia, moduloId, recurso) {
-    return new Promise(resolve => {
-        console.log(`Salvando em [${materia}], Módulo [${moduloId}]:`, recurso);
-        setTimeout(() => resolve({ success: true }), 800);
-    });
+    await simulateNetworkDelay(800);
+
+    const modules = _mockMateriasContent[materia];
+    if (!modules) return Promise.reject("Matéria não encontrada");
+
+    const topic = modules.find(m => m.id === Number(moduloId));
+    if (!topic) return Promise.reject("Módulo não encontrado");
+
+    const newItem = {
+        id: Date.now(),
+        type: recurso.type,
+        nome: recurso.title,
+        desc: recurso.desc,
+        url: recurso.url,
+        ...(recurso.type === 'assignment' ? { status: 'Pendente' } : {})
+    };
+
+    topic.itens.push(newItem);
+    return Promise.resolve({ success: true });
 }
 
 export async function getExtraList() {
