@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { getStudents, addStudent, deleteStudent } from '../../services/api';
+import { useDialog } from '../../contexts/DialogContext';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { Table } from '../../components/Table';
 import { Input } from '../../components/Form/Input';
 import { Select } from '../../components/Form/Select';
-import styles from './Alunos.module.css'; 
+import styles from './Alunos.module.css';
 
 export function Alunos() {
+    const { toast, confirm } = useDialog();
+
     const [alunos, setAlunos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -31,19 +34,21 @@ export function Alunos() {
         e.preventDefault();
         try {
             await addStudent(novoAluno);
-            alert("Aluno cadastrado!");
+            toast('Aluno cadastrado com sucesso!', 'success');
             setNovoAluno({ matricula: '', nome: '', turma: '', status: 'Ativo' });
             carregarAlunos();
         } catch (error) {
             console.error(error);
+            toast('Erro ao cadastrar aluno.', 'error');
         }
     }
 
-    async function handleDelete(matricula) {
-        if (confirm(`Remover ${matricula}?`)) {
-            await deleteStudent(matricula);
-            setAlunos(alunos.filter(a => a.matricula !== matricula));
-        }
+    async function handleDelete(aluno) {
+        const ok = await confirm(`Remover o aluno "${aluno.nome}"? Esta ação não pode ser desfeita.`);
+        if (!ok) return;
+        await deleteStudent(aluno.matricula);
+        setAlunos(prev => prev.filter(a => a.matricula !== aluno.matricula));
+        toast('Aluno removido.', 'success');
     }
 
     const alunosFiltrados = alunos.filter(aluno => 
@@ -91,7 +96,7 @@ export function Alunos() {
                         <td>
                             <Button 
                                 variant="danger" 
-                                onClick={() => handleDelete(aluno.matricula)}
+                                onClick={() => handleDelete(aluno)}
                                 title="Remover"
                             >
                                 <i className="fa-solid fa-trash"></i>

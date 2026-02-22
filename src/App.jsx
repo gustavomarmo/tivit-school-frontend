@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { DialogProvider } from './contexts/DialogContext';
 import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
 import { Calendario } from './pages/Calendario';
@@ -23,27 +24,29 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
+        <DialogProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
 
-            <Route path="/" element={
-              <PrivateRoute>
-                <MainLayout />
-              </PrivateRoute>
-            }>
-              <Route index element={<Dashboard />} />
-              <Route path="alunos" element={<Alunos />} />
-              <Route path="calendario" element={<Calendario />} />
-              <Route path="materias" element={<Materias />} />
-              <Route path="professores" element={<Professores />} />
-              <Route path="boletim" element={<Boletim />} />
-              <Route path="frequencia" element={<Frequencia />} />
-              <Route path="notas" element={<Notas />} />
-            </Route>
+              <Route path="/" element={
+                <PrivateRoute>
+                  <MainLayout />
+                </PrivateRoute>
+              }>
+                <Route index element={<Dashboard />} />
+                <Route path="alunos" element={<Alunos />} />
+                <Route path="calendario" element={<Calendario />} />
+                <Route path="materias" element={<Materias />} />
+                <Route path="professores" element={<Professores />} />
+                <Route path="boletim" element={<Boletim />} />
+                <Route path="frequencia" element={<Frequencia />} />
+                <Route path="notas" element={<Notas />} />
+              </Route>
 
-          </Routes>
-        </BrowserRouter>
+            </Routes>
+          </BrowserRouter>
+        </DialogProvider>
       </AuthProvider>
     </ThemeProvider>
   );
