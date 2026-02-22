@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getTeachers, addTeacher, deleteTeacher } from '../../services/api';
+import { useDialog } from '../../contexts/DialogContext';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { Table } from '../../components/Table';
@@ -8,15 +9,14 @@ import { Select } from '../../components/Form/Select';
 import styles from './Professores.module.css';
 
 export function Professores() {
+    const { toast, confirm } = useDialog();
+
     const [professores, setProfessores] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     
     const [novoProf, setNovoProf] = useState({
-        matricula: '', 
-        nome: '', 
-        disciplina: '', 
-        status: 'Ativo'
+        matricula: '', nome: '', disciplina: '', status: 'Ativo'
     });
 
     useEffect(() => {
@@ -33,26 +33,26 @@ export function Professores() {
     async function handleAdd(e) {
         e.preventDefault();
         if (!novoProf.matricula || !novoProf.nome || !novoProf.disciplina) {
-            alert("Preencha todos os campos obrigatórios!");
+            toast('Preencha todos os campos obrigatórios.', 'warning');
             return;
         }
-
         try {
             await addTeacher(novoProf);
-            alert("Professor cadastrado com sucesso!");
+            toast('Professor cadastrado com sucesso!', 'success');
             setNovoProf({ matricula: '', nome: '', disciplina: '', status: 'Ativo' });
             carregarProfessores();
         } catch (error) {
             console.error(error);
-            alert("Erro ao cadastrar.");
+            toast('Erro ao cadastrar professor.', 'error');
         }
     }
 
-    async function handleDelete(matricula) {
-        if (confirm(`Remover o professor ${matricula}?`)) {
-            await deleteTeacher(matricula);
-            setProfessores(professores.filter(p => p.matricula !== matricula));
-        }
+    async function handleDelete(prof) {
+        const ok = await confirm(`Remover o professor "${prof.nome}"? Esta ação não pode ser desfeita.`);
+        if (!ok) return;
+        await deleteTeacher(prof.matricula);
+        setProfessores(prev => prev.filter(p => p.matricula !== prof.matricula));
+        toast('Professor removido.', 'success');
     }
 
     const professoresFiltrados = professores.filter(p => 
@@ -104,7 +104,7 @@ export function Professores() {
                             <td>
                                 <Button 
                                     variant="danger" 
-                                    onClick={() => handleDelete(prof.matricula)}
+                                    onClick={() => handleDelete(prof)}
                                     title="Remover"
                                 >
                                     <i className="fa-solid fa-trash"></i>
