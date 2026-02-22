@@ -1,0 +1,220 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--brand-primary);
+    padding: 20px;
+}
+
+.themeBtnContainer {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+.box {
+    background-color: var(--bg-primary);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.logoContainer img {
+    height: 60px;
+    margin-bottom: 20px;
+}
+
+.iconWrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: rgba(242, 0, 36, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 1.6rem;
+    color: var(--brand-primary);
+}
+
+.box h2 {
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 1.5rem;
+}
+
+.description {
+    color: var(--icon-inactive);
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+
+.emailHighlight {
+    color: var(--brand-primary);
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    word-break: break-all;
+}
+
+.errorMessage {
+    background-color: #ffcccc;
+    color: #cc0000;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}
+
+/* --- OTP INPUTS --- */
+.otpGroup {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.otpInput {
+    width: 48px;
+    height: 56px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    caret-color: var(--brand-primary);
+}
+
+.otpInput:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px rgba(242, 0, 36, 0.12);
+    transform: scale(1.05);
+}
+
+.otpInput.filled {
+    border-color: var(--brand-primary);
+    background-color: rgba(242, 0, 36, 0.05);
+}
+
+.hint {
+    font-size: 0.8rem;
+    color: var(--icon-inactive);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btnSubmit {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--brand-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btnSubmit:hover:not(:disabled) {
+    background-color: var(--brand-secondary);
+}
+
+.btnSubmit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.resendRow {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: var(--icon-inactive);
+}
+
+.resendBtn {
+    background: none;
+    border: none;
+    color: var(--brand-primary);
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    transition: color 0.2s;
+}
+
+.resendBtn:disabled {
+    color: var(--icon-inactive);
+    cursor: default;
+}
+
+.resendBtn:not(:disabled):hover {
+    text-decoration: underline;
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    background: none;
+    border: none;
+    color: var(--icon-inactive);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    font-family: inherit;
+}
+
+.backLink:hover {
+    color: var(--brand-primary);
+}
+
+@media (max-width: 420px) {
+    .otpInput {
+        width: 40px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+    .otpGroup {
+        gap: 7px;
+    }
+}

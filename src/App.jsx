@@ -13,6 +13,8 @@ import { Boletim } from './pages/Boletim';
 import { Frequencia } from './pages/Frequencia';
 import { Notas } from './pages/Notas';
 import { useContext } from 'react';
+import { EsqueciSenha } from './pages/EsqueciSenha';
+import { VerificacaoOTP } from './pages/VerificacaoOTP';
 
 
 function PrivateRoute({ children }) {
@@ -28,6 +30,8 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/esqueci-minha-senha" element={<EsqueciSenha />} />
+              <Route path="/esqueci-minha-senha/codigo-otp" element={<Login />} />
 
               <Route path="/" element={
                 <PrivateRoute>

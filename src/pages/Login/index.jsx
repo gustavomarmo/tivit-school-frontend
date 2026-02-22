@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import styles from './Login.module.css';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import logo from '../../assets/images/Logo Edu Connect.png';
@@ -71,6 +71,19 @@ export function Login() {
                                 required
                             />
                         </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right', marginBottom: '20px', marginTop: '-8px' }}>
+                        <Link 
+                            to="/esqueci-minha-senha" 
+                            style={{ 
+                                fontSize: '0.85rem', 
+                                color: 'var(--brand-primary)', 
+                                textDecoration: 'none' 
+                            }}
+                        >
+                            Esqueci minha senha
+                        </Link>
                     </div>
 
                     <button type="submit" className={styles.btnLogin} disabled={loading}>
