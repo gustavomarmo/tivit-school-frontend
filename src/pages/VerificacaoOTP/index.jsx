@@ -5,7 +5,7 @@ import logo from '../../assets/images/Logo Edu Connect.png';
 import styles from './VerificacaoOTP.module.css';
 
 const OTP_LENGTH = 6;
-const MOCK_CODE = '1234';
+const MOCK_CODE = '123456';
 const RESEND_COOLDOWN = 30;
 
 async function mockResend(email) {
@@ -170,11 +170,6 @@ export function VerificacaoOTP() {
                         ))}
                     </div>
 
-                    <p className={styles.hint}>
-                        <i className="fa-solid fa-circle-info"></i>
-                        Dica: use o código <strong>1234</strong> para testar
-                    </p>
-
                     <button
                         type="submit"
                         className={styles.btnSubmit}
@@ -209,7 +204,7 @@ export function VerificacaoOTP() {
                     </button>
                 </div>
 
-                <button className={styles.backLink} onClick={() => navigate('/forgot-password')}>
+                <button className={styles.backLink} onClick={() => navigate('/esqueci-minha-senha')}>
                     <i className="fa-solid fa-arrow-left"></i> Alterar e-mail
                 </button>
             </div>

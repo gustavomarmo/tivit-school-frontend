@@ -31,7 +31,7 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/esqueci-minha-senha" element={<EsqueciSenha />} />
-              <Route path="/esqueci-minha-senha/codigo-otp" element={<Login />} />
+              <Route path="/esqueci-minha-senha/codigo-otp" element={<VerificacaoOTP />} />
 
               <Route path="/" element={
                 <PrivateRoute>
