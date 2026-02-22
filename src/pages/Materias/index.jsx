@@ -10,16 +10,18 @@ import {
     editMaterialFromSubject,
 } from '../../services/api';
 import { useAuth } from '../../hooks/useAuth';
+import { useDialog } from '../../contexts/DialogContext';
 import { ResourceItem } from '../../components/ResourceItem';
 import { Button } from '../../components/Button';
+import { IconButton } from '../../components/IconButton';
 import { Modal } from '../../components/Modal';
 import { Input } from '../../components/Form/Input';
 import { Select } from '../../components/Form/Select';
-import { IconButton } from '../../components/IconButton';
 import styles from './Materias.module.css';
 
 export function Materias() {
     const { userRole } = useAuth();
+    const { toast, confirm } = useDialog();
     const isProfessor = userRole === 'professor' || userRole === 'coordenador';
 
     const [subjects, setSubjects] = useState([]);
@@ -59,18 +61,19 @@ export function Materias() {
         setLoadingContent(true);
         getSubjectContent(selectedSubject).then(data => {
             setModules(data);
-            if (data.length > 0) {
-                setNewActivity(prev => ({ ...prev, moduleId: data[0].id }));
-            }
+            if (data.length > 0) setNewActivity(prev => ({ ...prev, moduleId: data[0].id }));
             setLoadingContent(false);
         });
     }
 
     async function handleAddActivity(e) {
         e.preventDefault();
-        if (!newActivity.title || !newActivity.url) return alert("Preencha título e link/arquivo");
+        if (!newActivity.title || !newActivity.url) {
+            toast('Preencha o título e o link/arquivo.', 'warning');
+            return;
+        }
         await addSubjectResource(selectedSubject, newActivity.moduleId, newActivity);
-        alert("Atividade adicionada com sucesso!");
+        toast('Atividade adicionada com sucesso!', 'success');
         setIsModalOpen(false);
         setNewActivity({ ...newActivity, title: '', desc: '', url: '' });
         carregarConteudo();
@@ -82,20 +85,23 @@ export function Materias() {
         setSavingTopic(true);
         try {
             await addTopicToSubject(selectedSubject, newTopicTitle.trim());
+            toast('Tópico criado com sucesso!', 'success');
             setIsTopicModalOpen(false);
             setNewTopicTitle('');
             carregarConteudo();
         } catch (err) {
             console.error(err);
-            alert("Erro ao criar tópico. Tente novamente.");
+            toast('Erro ao criar tópico. Tente novamente.', 'error');
         } finally {
             setSavingTopic(false);
         }
     }
 
-    async function handleDeleteTopic(topicId, topicTitle) {
-        if (!confirm(`Deletar o tópico "${topicTitle}" e todo seu conteúdo?`)) return;
-        await deleteTopicFromSubject(selectedSubject, topicId);
+    async function handleDeleteTopic(module) {
+        const ok = await confirm(`Deletar o tópico "${module.titulo}" e todo seu conteúdo?`);
+        if (!ok) return;
+        await deleteTopicFromSubject(selectedSubject, module.id);
+        toast('Tópico removido.', 'success');
         carregarConteudo();
     }
 
@@ -110,19 +116,22 @@ export function Materias() {
         setSavingEditTopic(true);
         try {
             await editTopicFromSubject(selectedSubject, editingTopic.id, editTopicTitle.trim());
+            toast('Tópico atualizado!', 'success');
             setEditingTopic(null);
             carregarConteudo();
         } catch (err) {
             console.error(err);
-            alert("Erro ao editar tópico.");
+            toast('Erro ao editar tópico.', 'error');
         } finally {
             setSavingEditTopic(false);
         }
     }
 
     async function handleDeleteItem(topicId, item) {
-        if (!confirm(`Deletar "${item.nome}"?`)) return;
+        const ok = await confirm(`Deletar a atividade "${item.nome}"?`);
+        if (!ok) return;
         await deleteMaterialFromSubject(selectedSubject, topicId, item.id);
+        toast('Atividade removida.', 'success');
         carregarConteudo();
     }
 
@@ -137,11 +146,12 @@ export function Materias() {
         setSavingEditItem(true);
         try {
             await editMaterialFromSubject(selectedSubject, editingItem.topicId, editingItem.item.id, editItemData);
+            toast('Atividade atualizada!', 'success');
             setEditingItem(null);
             carregarConteudo();
         } catch (err) {
             console.error(err);
-            alert("Erro ao editar atividade.");
+            toast('Erro ao editar atividade.', 'error');
         } finally {
             setSavingEditItem(false);
         }
@@ -196,17 +206,8 @@ export function Materias() {
 
                                     {isProfessor && (
                                         <span style={{ display: 'inline-flex', gap: '2px', marginLeft: '8px' }}>
-                                            <IconButton
-                                                icon="fa-pen"
-                                                title="Editar tópico"
-                                                onClick={() => openEditTopic(module)}
-                                            />
-                                            <IconButton
-                                                icon="fa-trash"
-                                                title="Deletar tópico"
-                                                variant="danger"
-                                                onClick={() => handleDeleteTopic(module.id, module.titulo)}
-                                            />
+                                            <IconButton icon="fa-pen" title="Editar tópico" onClick={() => openEditTopic(module)} />
+                                            <IconButton icon="fa-trash" title="Deletar tópico" variant="danger" onClick={() => handleDeleteTopic(module)} />
                                         </span>
                                     )}
                                 </h3>
@@ -218,7 +219,7 @@ export function Materias() {
                                         </p>
                                     ) : (
                                         module.itens.map(item => (
-                                            <div key={item.id} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                 <div style={{ flex: 1 }}>
                                                     <ResourceItem
                                                         type={item.type}
@@ -228,20 +229,10 @@ export function Materias() {
                                                         onOpen={() => setViewContent(item)}
                                                     />
                                                 </div>
-
                                                 {isProfessor && (
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexShrink: 0 }}>
-                                                        <IconButton
-                                                            icon="fa-pen"
-                                                            title="Editar atividade"
-                                                            onClick={() => openEditItem(module.id, item)}
-                                                        />
-                                                        <IconButton
-                                                            icon="fa-trash"
-                                                            title="Deletar atividade"
-                                                            variant="danger"
-                                                            onClick={() => handleDeleteItem(module.id, item)}
-                                                        />
+                                                        <IconButton icon="fa-pen" title="Editar atividade" onClick={() => openEditItem(module.id, item)} />
+                                                        <IconButton icon="fa-trash" title="Deletar atividade" variant="danger" onClick={() => handleDeleteItem(module.id, item)} />
                                                     </div>
                                                 )}
                                             </div>
@@ -257,56 +248,24 @@ export function Materias() {
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Adicionar Nova Atividade">
                 <form onSubmit={handleAddActivity}>
                     <div style={{ display: 'grid', gap: '15px' }}>
-                        <Select
-                            label="Módulo"
-                            value={newActivity.moduleId}
-                            onChange={e => setNewActivity({ ...newActivity, moduleId: e.target.value })}
-                        >
-                            {modules.map(m => (
-                                <option key={m.id} value={m.id}>{m.titulo}</option>
-                            ))}
+                        <Select label="Módulo" value={newActivity.moduleId} onChange={e => setNewActivity({ ...newActivity, moduleId: e.target.value })}>
+                            {modules.map(m => <option key={m.id} value={m.id}>{m.titulo}</option>)}
                         </Select>
-
-                        <Select
-                            label="Tipo de Recurso"
-                            value={newActivity.type}
-                            onChange={e => setNewActivity({ ...newActivity, type: e.target.value })}
-                        >
+                        <Select label="Tipo de Recurso" value={newActivity.type} onChange={e => setNewActivity({ ...newActivity, type: e.target.value })}>
                             <option value="link">Vídeo / Link Externo</option>
                             <option value="file">Arquivo PDF / Doc</option>
                             <option value="assignment">Atividade / Tarefa</option>
                         </Select>
-
-                        <Input
-                            label="Título"
-                            placeholder="Ex: Aula sobre Equações"
-                            required
-                            value={newActivity.title}
-                            onChange={e => setNewActivity({ ...newActivity, title: e.target.value })}
-                        />
-                        <Input
-                            label="Descrição Curta"
-                            placeholder="Ex: Ler páginas 10 a 15"
-                            value={newActivity.desc}
-                            onChange={e => setNewActivity({ ...newActivity, desc: e.target.value })}
-                        />
-
+                        <Input label="Título" placeholder="Ex: Aula sobre Equações" required value={newActivity.title} onChange={e => setNewActivity({ ...newActivity, title: e.target.value })} />
+                        <Input label="Descrição Curta" placeholder="Ex: Ler páginas 10 a 15" value={newActivity.desc} onChange={e => setNewActivity({ ...newActivity, desc: e.target.value })} />
                         {newActivity.type === 'file' ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                                 <label style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Arquivo</label>
                                 <input type="file" required onChange={e => setNewActivity({ ...newActivity, url: e.target.value })} />
                             </div>
                         ) : (
-                            <Input
-                                label="URL do Link / Vídeo"
-                                placeholder="https://..."
-                                type="url"
-                                required
-                                value={newActivity.url}
-                                onChange={e => setNewActivity({ ...newActivity, url: e.target.value })}
-                            />
+                            <Input label="URL do Link / Vídeo" placeholder="https://..." type="url" required value={newActivity.url} onChange={e => setNewActivity({ ...newActivity, url: e.target.value })} />
                         )}
-
                         <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
                             <Button type="submit"><i className="fa-solid fa-check"></i> Adicionar</Button>
                         </div>
@@ -314,25 +273,12 @@ export function Materias() {
                 </form>
             </Modal>
 
-            <Modal
-                isOpen={isTopicModalOpen}
-                onClose={() => { setIsTopicModalOpen(false); setNewTopicTitle(''); }}
-                title="Criar Novo Tópico"
-            >
+            <Modal isOpen={isTopicModalOpen} onClose={() => { setIsTopicModalOpen(false); setNewTopicTitle(''); }} title="Criar Novo Tópico">
                 <form onSubmit={handleAddTopic}>
                     <div style={{ display: 'grid', gap: '15px' }}>
-                        <Input
-                            label="Título do Tópico"
-                            placeholder="Ex: 1º Bimestre: Introdução à Álgebra"
-                            required
-                            autoFocus
-                            value={newTopicTitle}
-                            onChange={e => setNewTopicTitle(e.target.value)}
-                        />
+                        <Input label="Título do Tópico" placeholder="Ex: 1º Bimestre: Introdução à Álgebra" required autoFocus value={newTopicTitle} onChange={e => setNewTopicTitle(e.target.value)} />
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                            <Button type="button" variant="icon" onClick={() => { setIsTopicModalOpen(false); setNewTopicTitle(''); }}>
-                                Cancelar
-                            </Button>
+                            <Button type="button" variant="icon" onClick={() => { setIsTopicModalOpen(false); setNewTopicTitle(''); }}>Cancelar</Button>
                             <Button type="submit" disabled={savingTopic}>
                                 <i className="fa-solid fa-folder-plus"></i>
                                 {savingTopic ? 'Criando...' : 'Criar Tópico'}
@@ -342,20 +288,10 @@ export function Materias() {
                 </form>
             </Modal>
 
-            <Modal
-                isOpen={!!editingTopic}
-                onClose={() => setEditingTopic(null)}
-                title="Editar Tópico"
-            >
+            <Modal isOpen={!!editingTopic} onClose={() => setEditingTopic(null)} title="Editar Tópico">
                 <form onSubmit={handleEditTopic}>
                     <div style={{ display: 'grid', gap: '15px' }}>
-                        <Input
-                            label="Título do Tópico"
-                            required
-                            autoFocus
-                            value={editTopicTitle}
-                            onChange={e => setEditTopicTitle(e.target.value)}
-                        />
+                        <Input label="Título do Tópico" required autoFocus value={editTopicTitle} onChange={e => setEditTopicTitle(e.target.value)} />
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                             <Button type="button" variant="icon" onClick={() => setEditingTopic(null)}>Cancelar</Button>
                             <Button type="submit" disabled={savingEditTopic}>
@@ -367,42 +303,17 @@ export function Materias() {
                 </form>
             </Modal>
 
-            <Modal
-                isOpen={!!editingItem}
-                onClose={() => setEditingItem(null)}
-                title="Editar Atividade"
-            >
+            <Modal isOpen={!!editingItem} onClose={() => setEditingItem(null)} title="Editar Atividade">
                 <form onSubmit={handleEditItem}>
                     <div style={{ display: 'grid', gap: '15px' }}>
-                        <Select
-                            label="Tipo de Recurso"
-                            value={editItemData.type}
-                            onChange={e => setEditItemData({ ...editItemData, type: e.target.value })}
-                        >
+                        <Select label="Tipo de Recurso" value={editItemData.type} onChange={e => setEditItemData({ ...editItemData, type: e.target.value })}>
                             <option value="link">Vídeo / Link Externo</option>
                             <option value="file">Arquivo PDF / Doc</option>
                             <option value="assignment">Atividade / Tarefa</option>
                         </Select>
-
-                        <Input
-                            label="Título"
-                            required
-                            value={editItemData.nome}
-                            onChange={e => setEditItemData({ ...editItemData, nome: e.target.value })}
-                        />
-                        <Input
-                            label="Descrição"
-                            value={editItemData.desc}
-                            onChange={e => setEditItemData({ ...editItemData, desc: e.target.value })}
-                        />
-                        <Input
-                            label="URL / Link"
-                            type="url"
-                            value={editItemData.url}
-                            onChange={e => setEditItemData({ ...editItemData, url: e.target.value })}
-                            placeholder="https://..."
-                        />
-
+                        <Input label="Título" required value={editItemData.nome} onChange={e => setEditItemData({ ...editItemData, nome: e.target.value })} />
+                        <Input label="Descrição" value={editItemData.desc} onChange={e => setEditItemData({ ...editItemData, desc: e.target.value })} />
+                        <Input label="URL / Link" type="url" value={editItemData.url} onChange={e => setEditItemData({ ...editItemData, url: e.target.value })} placeholder="https://..." />
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                             <Button type="button" variant="icon" onClick={() => setEditingItem(null)}>Cancelar</Button>
                             <Button type="submit" disabled={savingEditItem}>
@@ -418,20 +329,16 @@ export function Materias() {
                 <Modal isOpen={!!viewContent} onClose={() => setViewContent(null)} title={viewContent.nome}>
                     <div style={{ textAlign: 'center', padding: '20px' }}>
                         <i
-                            className={`fa-solid ${
-                                viewContent.type === 'link' ? 'fa-video' :
-                                viewContent.type === 'file' ? 'fa-file-pdf' : 'fa-clipboard-list'
-                            }`}
+                            className={`fa-solid ${viewContent.type === 'link' ? 'fa-video' : viewContent.type === 'file' ? 'fa-file-pdf' : 'fa-clipboard-list'}`}
                             style={{ fontSize: '4rem', color: 'var(--brand-primary)', marginBottom: '20px' }}
-                        ></i>
+                        />
                         <p style={{ fontSize: '1.1rem', marginBottom: '20px' }}>{viewContent.desc}</p>
-
                         {viewContent.type === 'link' ? (
                             <Button onClick={() => window.open(viewContent.url, '_blank')}>
                                 <i className="fa-solid fa-external-link"></i> Acessar Conteúdo
                             </Button>
                         ) : viewContent.type === 'file' ? (
-                            <Button onClick={() => alert('Download iniciado...')}>
+                            <Button onClick={() => toast('Download iniciado!', 'info')}>
                                 <i className="fa-solid fa-download"></i> Baixar Arquivo
                             </Button>
                         ) : (
