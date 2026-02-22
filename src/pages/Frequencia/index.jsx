@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getClasses, getSubjectsList, getStudents, saveAttendance } from '../../services/api';
+import { useDialog } from '../../contexts/DialogContext';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Select } from '../../components/Form/Select';
@@ -7,15 +8,12 @@ import { Table } from '../../components/Table';
 import styles from './Frequencia.module.css';
 
 export function Frequencia() {
+    const { toast } = useDialog();
+
     const [turmas, setTurmas] = useState([]);
     const [materias, setMaterias] = useState([]);
     
-    const [filtro, setFiltro] = useState({
-        turma: '',
-        materia: '',
-        horario: ''
-    });
-
+    const [filtro, setFiltro] = useState({ turma: '', materia: '', horario: '' });
     const [alunos, setAlunos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [listVisible, setListVisible] = useState(false);
@@ -27,30 +25,20 @@ export function Frequencia() {
 
     async function handleBuscar() {
         if (!filtro.turma || !filtro.materia || !filtro.horario) {
-            alert("Por favor, selecione todos os campos (Turma, Matéria e Horário).");
+            toast('Selecione Turma, Matéria e Horário para continuar.', 'warning');
             return;
         }
-
         setLoading(true);
-        const dados = await getStudents(); 
-        
-        const alunosPreparados = dados.map(a => ({
-            ...a,
-            presente: true 
-        }));
-
-        setAlunos(alunosPreparados);
+        const dados = await getStudents();
+        setAlunos(dados.map(a => ({ ...a, presente: true })));
         setListVisible(true);
         setLoading(false);
     }
 
     function togglePresenca(matricula) {
-        setAlunos(alunos.map(aluno => {
-            if (aluno.matricula === matricula) {
-                return { ...aluno, presente: !aluno.presente };
-            }
-            return aluno;
-        }));
+        setAlunos(alunos.map(aluno =>
+            aluno.matricula === matricula ? { ...aluno, presente: !aluno.presente } : aluno
+        ));
     }
 
     async function handleSubmit() {
@@ -59,9 +47,8 @@ export function Frequencia() {
             data: new Date().toISOString().split('T')[0],
             frequencia: alunos.map(a => ({ matricula: a.matricula, presente: a.presente }))
         };
-
         await saveAttendance(payload);
-        alert("Frequência registrada com sucesso!");
+        toast('Frequência registrada com sucesso!', 'success');
         setListVisible(false);
         setFiltro({ turma: '', materia: '', horario: '' });
     }
