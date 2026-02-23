@@ -107,6 +107,14 @@ export async function addStudent(studentData) {
     return Promise.resolve(studentData);
 }
 
+export async function editStudent(matricula, newData) {
+    await simulateNetworkDelay(400);
+    const student = _mockStudentData.find(s => s.matricula === matricula);
+    if (!student) return Promise.reject("Aluno não encontrado");
+    Object.assign(student, newData);
+    return Promise.resolve(true);
+}
+
 /**
  * @param {string} studentId
  * @returns {Promise<boolean>}
@@ -132,6 +140,14 @@ export async function addTeacher(teacher) {
             resolve(teacher);
         }, 300);
     });
+}
+
+export async function editTeacher(matricula, newData) {
+    await simulateNetworkDelay(400);
+    const teacher = professoresMock.find(t => t.matricula === matricula);
+    if (!teacher) return Promise.reject("Professor não encontrado");
+    Object.assign(teacher, newData);
+    return Promise.resolve(true);
 }
 
 export async function deleteTeacher(matricula) {
