@@ -4,6 +4,7 @@ import {
     iniciarMatricula, validarOtpMatricula, checarVaga, salvarEtapaMatricula 
 } from '../../services/api';
 import { useDialog } from '../../contexts/DialogContext';
+import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Form/Input';
 import { Select } from '../../components/Form/Select';
@@ -102,6 +103,11 @@ export function Matricula() {
 
     return (
         <div className={styles.portalContainer}>
+
+            <div className={styles.themeBtnContainer}>
+                <ThemeSwitcher />
+            </div>
+
             <div className={styles.wizardCard}>
                 <div className={styles.header}>
                     <img src={logo} alt="Edu Connect" />

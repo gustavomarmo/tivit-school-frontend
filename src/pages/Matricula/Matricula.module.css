@@ -88,3 +88,10 @@
     .formGrid { grid-template-columns: 1fr; }
     .wizardCard { padding: 20px; }
 }
+
+.themeBtnContainer {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}
