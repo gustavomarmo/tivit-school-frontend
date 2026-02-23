@@ -15,6 +15,8 @@ import { Notas } from './pages/Notas';
 import { useContext } from 'react';
 import { EsqueciSenha } from './pages/EsqueciSenha';
 import { VerificacaoOTP } from './pages/VerificacaoOTP';
+import { Matricula } from './pages/Matricula';
+import { AprovacaoMatriculas } from './pages/AprovacaoMatriculas';
 
 
 function PrivateRoute({ children }) {
@@ -32,6 +34,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/esqueci-minha-senha" element={<EsqueciSenha />} />
               <Route path="/esqueci-minha-senha/codigo-otp" element={<VerificacaoOTP />} />
+              <Route path="/matricula" element={<Matricula />} />
 
               <Route path="/" element={
                 <PrivateRoute>
@@ -46,6 +49,7 @@ function App() {
                 <Route path="boletim" element={<Boletim />} />
                 <Route path="frequencia" element={<Frequencia />} />
                 <Route path="notas" element={<Notas />} />
+                <Route path="aprovacao-matriculas" element={<AprovacaoMatriculas />} />
               </Route>
 
             </Routes>

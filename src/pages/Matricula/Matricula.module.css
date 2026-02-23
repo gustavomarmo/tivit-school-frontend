@@ -1,0 +1,90 @@
+.portalContainer {
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+}
+
+.wizardCard {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 700px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    animation: slideUp 0.4s ease;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header img {
+    height: 50px;
+    margin-bottom: 15px;
+}
+
+.stepIndicator {
+    font-size: 0.9rem;
+    color: var(--brand-primary);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.fullWidth {
+    grid-column: 1 / -1;
+}
+
+.actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.statusMessage {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.statusMessage i {
+    font-size: 4rem;
+    color: var(--brand-primary);
+    margin-bottom: 20px;
+}
+
+.termsBox {
+    height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    background-color: rgba(0,0,0,0.02);
+    margin-bottom: 15px;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .formGrid { grid-template-columns: 1fr; }
+    .wizardCard { padding: 20px; }
+}

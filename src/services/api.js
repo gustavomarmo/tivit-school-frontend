@@ -4,6 +4,8 @@
  */
 const simulateNetworkDelay = (ms = 300) => new Promise(res => setTimeout(res, ms));
 
+const getMatriculasDB = () => JSON.parse(localStorage.getItem('matriculas_db') || '[]');
+const saveMatriculasDB = (data) => localStorage.setItem('matriculas_db', JSON.stringify(data));
 
 let _calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || {};
 
@@ -660,5 +662,99 @@ export async function saveGrades(payload) {
     return new Promise(resolve => {
         console.log("Notas salvas:", payload);
         setTimeout(() => resolve({ success: true }), 600);
+    });
+}
+
+export async function iniciarMatricula(dadosIniciais) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            const db = getMatriculasDB();
+            let matricula = db.find(m => m.email === dadosIniciais.email);
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+            if (!matricula) {
+                matricula = {
+                    ...dadosIniciais,
+                    id: Date.now().toString(),
+                    otp: otp,
+                    status: 'AGUARDANDO_OTP',
+                    etapaAtual: 2
+                };
+                db.push(matricula);
+            } else {
+                matricula.otp = otp;
+            }
+
+            saveMatriculasDB(db);
+            console.log(`[E-mail Enviado] Seu código OTP é: ${otp}`);
+            resolve({ success: true, otp: otp });
+        }, 500);
+    });
+}
+
+export async function validarOtpMatricula(email, otpInserido) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            const db = getMatriculasDB();
+            const matricula = db.find(m => m.email === email && m.otp === otpInserido);
+            
+            if (matricula) {
+                if(matricula.status === 'AGUARDANDO_OTP') matricula.status = 'PREENCHENDO';
+                saveMatriculasDB(db);
+                resolve(matricula);
+            } else {
+                reject("E-mail ou Código OTP inválidos.");
+            }
+        }, 500);
+    });
+}
+
+export async function checarVaga(serie, turno) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            if (serie === '1º Ano EM' && turno === 'Noite') {
+                resolve({ disponivel: false });
+            } else {
+                const valor = turno === 'Manhã' ? 1500 : turno === 'Tarde' ? 1300 : 1100;
+                resolve({ disponivel: true, valor: valor });
+            }
+        }, 400);
+    });
+}
+
+export async function salvarEtapaMatricula(email, dadosNovos, novoStatus) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            const db = getMatriculasDB();
+            const index = db.findIndex(m => m.email === email);
+            if (index !== -1) {
+                db[index] = { ...db[index], ...dadosNovos, status: novoStatus };
+                saveMatriculasDB(db);
+                resolve(db[index]);
+            }
+        }, 500);
+    });
+}
+
+export async function getMatriculasPendentes() {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            const db = getMatriculasDB();
+            resolve(db.filter(m => m.status !== 'AGUARDANDO_OTP' && m.status !== 'PREENCHENDO'));
+        }, 400);
+    });
+}
+
+export async function avaliarMatriculaCoord(email, novoStatus) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            const db = getMatriculasDB();
+            const index = db.findIndex(m => m.email === email);
+            if (index !== -1) {
+                db[index].status = novoStatus;
+                saveMatriculasDB(db);
+                resolve({ success: true });
+            }
+        }, 500);
     });
 }

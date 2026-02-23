@@ -90,6 +90,10 @@ export function Login() {
                         {loading ? 'Entrando...' : 'Acessar'}
                     </button>
                 </form>
+
+                <div className={styles.registerPrompt}>
+                    Ainda não é aluno? <Link to="/matricula" className={styles.registerLink}>Matricule-se</Link>
+                </div>
             </div>
         </div>
     );
