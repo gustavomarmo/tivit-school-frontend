@@ -18,7 +18,7 @@ export function Professores() {
     const [searchTerm, setSearchTerm] = useState('');
 
     const [novoProf, setNovoProf] = useState({
-        matricula: '', nome: '', disciplina: '', status: 'Ativo'
+        matricula: '', nome: '', email: '', disciplina: '', status: 'Ativo'
     });
 
     const [editingProf, setEditingProf] = useState(null);
@@ -56,8 +56,8 @@ export function Professores() {
     async function handleDelete(prof) {
         const ok = await confirm(`Remover o professor "${prof.nome}"? Esta ação não pode ser desfeita.`);
         if (!ok) return;
-        await deleteTeacher(prof.matricula);
-        setProfessores(prev => prev.filter(p => p.matricula !== prof.matricula));
+        await deleteTeacher(prof.id);
+        setProfessores(prev => prev.filter(p => p.id !== prof.id));
         toast('Professor removido.', 'success');
     }
 
@@ -70,7 +70,7 @@ export function Professores() {
         e.preventDefault();
         setSavingEdit(true);
         try {
-            await editTeacher(editingProf.matricula, editData);
+            await editTeacher(editingProf.id, editData);
             toast('Professor atualizado com sucesso!', 'success');
             setEditingProf(null);
             carregarProfessores();
@@ -106,7 +106,7 @@ export function Professores() {
                 </div>
             </Card>
 
-            <Table headers={['Matrícula', 'Nome', 'Disciplina', 'Status', 'Ações']}>
+            <Table headers={['Matrícula', 'Nome', 'Especialidade', 'E-mail', 'Status', 'Ações']}>
                 {loading ? (
                     <tr><td colSpan="5" align="center">Carregando...</td></tr>
                 ) : professoresFiltrados.length === 0 ? (
@@ -117,6 +117,7 @@ export function Professores() {
                             <td>{prof.matricula}</td>
                             <td>{prof.nome}</td>
                             <td>{prof.disciplina}</td>
+                            <td>{prof.email}</td>
                             <td>
                                 <span style={{ color: prof.status === 'Ativo' ? 'green' : 'red', fontWeight: 'bold' }}>
                                     {prof.status}
@@ -199,6 +200,14 @@ export function Professores() {
                                 required
                                 value={novoProf.disciplina}
                                 onChange={e => setNovoProf({ ...novoProf, disciplina: e.target.value })}
+                            />
+                            <Input
+                                label="E-mail"
+                                type="email"
+                                placeholder="Ex: professor@escola.com"
+                                required
+                                value={novoProf.email}
+                                onChange={e => setNovoProf({ ...novoProf, email: e.target.value })}
                             />
                             <Select
                                 label="Status"

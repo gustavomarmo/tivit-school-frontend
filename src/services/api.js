@@ -136,36 +136,46 @@ export async function getClasses() {
     return response.data;
 }
 
+// ============================
+// CRUD PROFESSORES
+// ============================
 export async function getTeachers() {
-    return new Promise(resolve => {
-        setTimeout(() => resolve(professoresMock), 300);
-    });
+    const response = await api.get('/professores');
+    return response.data.map(p => ({
+        id: p.id,
+        matricula: p.matricula,
+        nome: p.nome,
+        email: p.email,
+        disciplina: p.especialidade,
+        status: p.ativo ? 'Ativo' : 'Inativo',
+    }));
 }
 
-export async function addTeacher(teacher) {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            professoresMock.push(teacher);
-            resolve(teacher);
-        }, 300);
-    });
+export async function addTeacher(teacherData) {
+    const payload = {
+        nome: teacherData.nome,
+        matricula: teacherData.matricula,
+        email: teacherData.email || `${teacherData.matricula}@escola.com`,
+        especialidade: teacherData.disciplina,
+        ativo: teacherData.status !== 'Inativo',
+    };
+    const response = await api.post('/professores', payload);
+    return response.data;
 }
 
-export async function editTeacher(matricula, newData) {
-    await simulateNetworkDelay(400);
-    const teacher = professoresMock.find(t => t.matricula === matricula);
-    if (!teacher) return Promise.reject("Professor não encontrado");
-    Object.assign(teacher, newData);
-    return Promise.resolve(true);
+export async function editTeacher(id, newData) {
+    const payload = {
+        nome: newData.nome,
+        especialidade: newData.disciplina,
+        ativo: newData.status !== 'Inativo',
+    };
+    const response = await api.put(`/professores/${id}`, payload);
+    return response.data;
 }
 
-export async function deleteTeacher(matricula) {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            professoresMock = professoresMock.filter(t => t.matricula !== matricula);
-            resolve();
-        }, 300);
-    });
+export async function deleteTeacher(id) {
+    await api.delete(`/professores/${id}`);
+    return true;
 }
 
 export async function getCalendarEvents() {
