@@ -1,3 +1,4 @@
+import api from './axiosInstance';
 
 /**
  * @param {number} ms
