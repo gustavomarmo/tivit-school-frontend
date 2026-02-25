@@ -20,7 +20,7 @@ import { Select } from '../../components/Form/Select';
 import styles from './Materias.module.css';
 
 export function Materias() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast, confirm } = useDialog();
     const isProfessor = userRole === 'professor' || userRole === 'coordenador';
 
@@ -59,7 +59,7 @@ export function Materias() {
 
     function carregarConteudo() {
         setLoadingContent(true);
-        getSubjectContent(selectedSubject).then(data => {
+        getSubjectContent(selectedSubject, user.role).then(data => {
             setModules(data);
             if (data.length > 0) setNewActivity(prev => ({ ...prev, moduleId: data[0].id }));
             setLoadingContent(false);

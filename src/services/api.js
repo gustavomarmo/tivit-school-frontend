@@ -186,7 +186,7 @@ export async function getSubjectsList() {
     return response.data;
 }
 
-export async function getSubjectContent(subject) {
+export async function getSubjectContent(subject, role) {
     const response = await api.get(`/disciplinas/${subject.id}/conteudo`);
     const data = response.data;
 
@@ -201,7 +201,7 @@ export async function getSubjectContent(subject) {
                 ? `Entrega: ${new Date(m.dataEntrega).toLocaleDateString('pt-BR')}`
                 : '',
             url: m.url,
-            status: m.tipo === 'assignment'
+            status: (m.tipo === 'assignment' && role === 'aluno')
                 ? (m.entregue ? 'Entregue' : 'Pendente')
                 : null,
         }))
