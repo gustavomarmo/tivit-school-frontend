@@ -162,18 +162,25 @@ export function Materias() {
             <aside className={styles.sidebarList}>
                 {subjects.map(subj => (
                     <div
-                        key={subj}
-                        className={`${styles.subjectItem} ${selectedSubject === subj ? styles.activeSubject : ''}`}
+                        key={subj.id}
+                        className={`${styles.subjectItem} ${selectedSubject?.id === subj.id ? styles.activeSubject : ''}`}
                         onClick={() => setSelectedSubject(subj)}
                     >
-                        <i className="fa-solid fa-book"></i> {subj}
+                        <i className="fa-solid fa-book"></i> {subj.nome}
                     </div>
                 ))}
             </aside>
 
             <main className={styles.contentArea}>
                 <div className={styles.header} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <h1>{selectedSubject}</h1>
+                    <h1>{selectedSubject?.nome}</h1>
+                    
+                    {selectedSubject?.professor && (
+                        <p style={{ fontSize: '0.85rem', color: 'var(--icon-inactive)', margin: '4px 0 0' }}>
+                            <i className="fa-solid fa-chalkboard-user" style={{ marginRight: 6 }}></i>
+                            {selectedSubject.professor} — {selectedSubject.turma}
+                        </p>
+                    )}
 
                     {isProfessor && (
                         <div style={{ display: 'flex', gap: '10px' }}>

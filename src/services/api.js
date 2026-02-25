@@ -178,6 +178,88 @@ export async function deleteTeacher(id) {
     return true;
 }
 
+// ============================
+// CRUD DISCIPLINAS
+// ============================
+export async function getSubjectsList() {
+    const response = await api.get('/disciplinas/listar');
+    return response.data;
+}
+
+export async function getSubjectContent(subject) {
+    const response = await api.get(`/disciplinas/${subject.id}/conteudo`);
+    const data = response.data;
+
+    return data.topicos.map(t => ({
+        id: t.id,
+        titulo: t.titulo,
+        itens: t.materiais.map(m => ({
+            id: m.id,
+            type: m.tipo,
+            nome: m.titulo,
+            desc: m.dataEntrega
+                ? `Entrega: ${new Date(m.dataEntrega).toLocaleDateString('pt-BR')}`
+                : '',
+            url: m.url,
+            status: m.tipo === 'assignment'
+                ? (m.entregue ? 'Entregue' : 'Pendente')
+                : null,
+        }))
+    }));
+}
+
+// ============================
+// CRUD TÓPICOS
+// ============================
+export async function addTopicToSubject(subject, topicTitle) {
+    const response = await api.post('/topicos', {
+        titulo: topicTitle,
+        turmaDisciplinaId: subject.id,
+    });
+    return response.data;
+}
+
+export async function editTopicFromSubject(_subject, topicId, newTitle) {
+    await api.put(`/topicos/${topicId}`, {
+        titulo: newTitle,
+        turmaDisciplinaId: 0,
+    });
+    return true;
+}
+
+export async function deleteTopicFromSubject(_subject, topicId) {
+    await api.delete(`/topicos/${topicId}`);
+    return true;
+}
+
+// ============================
+// CRUD MATERIAIS
+// ============================
+export async function addSubjectResource(_subject, moduleId, recurso) {
+    await api.post('/materiais', {
+        titulo: recurso.title,
+        tipo: recurso.type,
+        url: recurso.url || '',
+        topicoId: Number(moduleId),
+    });
+    return { success: true };
+}
+
+export async function editMaterialFromSubject(_subject, _topicId, itemId, newData) {
+    await api.put(`/materiais/${itemId}`, {
+        titulo: newData.nome,
+        tipo: newData.type,
+        url: newData.url || '',
+        topicoId: 0,
+    });
+    return true;
+}
+
+export async function deleteMaterialFromSubject(_subject, _topicId, itemId) {
+    await api.delete(`/materiais/${itemId}`);
+    return true;
+}
+
 export async function getCalendarEvents() {
     return new Promise((resolve) => {
         setTimeout(() => {
@@ -487,85 +569,10 @@ const _mockExtraContent = {
     ]
 };
 
-export async function getSubjectsList() {
-    return new Promise(resolve => {
-        setTimeout(() => resolve([
-            "Matemática", "Português", "História", "Geografia", "Ciências", "Inglês"
-        ]), 300);
-    });
-}
-
-export async function getSubjectContent(subjectName) {
-    await simulateNetworkDelay(300);
-    return Promise.resolve(_mockMateriasContent[subjectName] || []);
-}
-
 export async function uploadStudentAssignment(assignmentId, file) {
     await simulateNetworkDelay(1000);
     console.log(`Arquivo ${file.name} enviado para a atividade ${assignmentId}`);
     return Promise.resolve(true);
-}
-
-export async function addTopicToSubject(subjectName, topicTitle) {
-    await simulateNetworkDelay(400);
-
-    if (!_mockMateriasContent[subjectName]) {
-        _mockMateriasContent[subjectName] = [];
-    }
-
-    const newTopic = {
-        id: Date.now(),
-        titulo: topicTitle,
-        itens: []
-    };
-
-    _mockMateriasContent[subjectName].push(newTopic);
-    return Promise.resolve(newTopic);
-}
-
-export async function editTopicFromSubject(subjectName, topicId, newTitle) {
-    await simulateNetworkDelay(400);
-
-    const topic = (_mockMateriasContent[subjectName] || []).find(m => m.id === Number(topicId));
-    if (!topic) return Promise.reject("Tópico não encontrado");
-
-    topic.titulo = newTitle;
-    return Promise.resolve(true);
-}
-
-export async function deleteTopicFromSubject(subjectName, topicId) {
-    await simulateNetworkDelay(400);
-
-    if (!_mockMateriasContent[subjectName]) return Promise.reject("Matéria não encontrada");
-
-    const before = _mockMateriasContent[subjectName].length;
-    _mockMateriasContent[subjectName] = _mockMateriasContent[subjectName].filter(m => m.id !== Number(topicId));
-
-    return _mockMateriasContent[subjectName].length < before
-        ? Promise.resolve(true)
-        : Promise.reject("Tópico não encontrado");
-}
-
-export async function addSubjectResource(materia, moduloId, recurso) {
-    await simulateNetworkDelay(800);
-
-    const modules = _mockMateriasContent[materia];
-    if (!modules) return Promise.reject("Matéria não encontrada");
-
-    const topic = modules.find(m => m.id === Number(moduloId));
-    if (!topic) return Promise.reject("Módulo não encontrado");
-
-    const newItem = {
-        id: Date.now(),
-        type: recurso.type,
-        nome: recurso.title,
-        desc: recurso.desc,
-        url: recurso.url,
-        ...(recurso.type === 'assignment' ? { status: 'Pendente' } : {})
-    };
-
-    topic.itens.push(newItem);
-    return Promise.resolve({ success: true });
 }
 
 export async function getExtraList() {
@@ -576,60 +583,6 @@ export async function getExtraList() {
 export async function getExtraContent(activityName) {
     await simulateNetworkDelay(300);
     return Promise.resolve(_mockExtraContent[activityName] || []);
-}
-
-/**
- * @param {string} subjectName
- * @param {number} topicId
- * @param {number} itemId
- * @returns {Promise<boolean>}
- */
-export async function deleteMaterialFromSubject(subjectName, topicId, itemId) {
-    await simulateNetworkDelay(400);
-    
-    const subjectModules = _mockMateriasContent[subjectName];
-    if (!subjectModules) return Promise.reject("Matéria não encontrada");
-
-    const topic = subjectModules.find(m => m.id === Number(topicId));
-    
-    if (topic) {
-        const itemIndex = topic.itens.findIndex(item => item.id === Number(itemId));
-        if (itemIndex > -1) {
-            topic.itens.splice(itemIndex, 1);
-            return Promise.resolve(true);
-        }
-    }
-    
-    return Promise.reject("Item não encontrado");
-}
-
-/**
- * @param {string} subjectName
- * @param {number} topicId
- * @param {number} itemId
- * @param {object} newData
- * @returns {Promise<boolean>}
- */
-export async function editMaterialFromSubject(subjectName, topicId, itemId, newData) {
-    await simulateNetworkDelay(500);
-    
-    const subjectModules = _mockMateriasContent[subjectName];
-    if (!subjectModules) return Promise.reject("Matéria não encontrada");
-
-    const topic = subjectModules.find(m => m.id === Number(topicId));
-    
-    if (topic) {
-        const item = topic.itens.find(item => item.id === Number(itemId));
-        if (item) {
-            item.nome = newData.nome || item.nome;
-            item.desc = newData.desc || item.desc;
-            item.url = newData.url || item.url;
-            item.type = newData.type || item.type;
-            return Promise.resolve(true);
-        }
-    }
-    
-    return Promise.reject("Item não encontrado");
 }
 
 /**
