@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getStudents, addStudent, deleteStudent, editStudent } from '../../services/api';
+import { getStudents, addStudent, deleteStudent, editStudent, getClasses} from '../../services/api';
 import { useDialog } from '../../contexts/DialogContext';
 import { Button } from '../../components/Button';
 import { IconButton } from '../../components/IconButton';
@@ -14,11 +14,12 @@ export function Alunos() {
     const { toast, confirm } = useDialog();
 
     const [alunos, setAlunos] = useState([]);
+    const [turmas, setTurmas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
     const [novoAluno, setNovoAluno] = useState({
-        matricula: '', nome: '', turma: '', status: 'Ativo'
+        matricula: '', nome: '', email: '', turmaId: '', status: 'Ativo'
     });
 
     const [editingAluno, setEditingAluno] = useState(null);
@@ -27,6 +28,7 @@ export function Alunos() {
 
     useEffect(() => {
         carregarAlunos();
+        getClasses().then(setTurmas);
     }, []);
 
     async function carregarAlunos() {
@@ -52,21 +54,21 @@ export function Alunos() {
     async function handleDelete(aluno) {
         const ok = await confirm(`Remover o aluno "${aluno.nome}"? Esta ação não pode ser desfeita.`);
         if (!ok) return;
-        await deleteStudent(aluno.matricula);
-        setAlunos(prev => prev.filter(a => a.matricula !== aluno.matricula));
+        await deleteStudent(aluno.id);
+        setAlunos(prev => prev.filter(a => a.id !== aluno.id));
         toast('Aluno removido.', 'success');
     }
 
     function openEdit(aluno) {
         setEditingAluno(aluno);
-        setEditData({ nome: aluno.nome, turma: aluno.turma, status: aluno.status });
+        setEditData({ nome: aluno.nome, turmaId: aluno.turmaId || '', status: aluno.status });
     }
 
     async function handleSaveEdit(e) {
         e.preventDefault();
         setSavingEdit(true);
         try {
-            await editStudent(editingAluno.matricula, editData);
+            await editStudent(editingAluno.id, editData);
             toast('Aluno atualizado com sucesso!', 'success');
             setEditingAluno(null);
             carregarAlunos();
@@ -101,7 +103,7 @@ export function Alunos() {
                 </div>
             </Card>
 
-            <Table headers={['Matrícula', 'Nome', 'Turma', 'Status', 'Ações']}>
+            <Table headers={['Matrícula', 'Nome', 'Turma', 'E-mail', 'Status', 'Ações']}>
                 {loading ? (
                     <tr><td colSpan="5" align="center">Carregando...</td></tr>
                 ) : alunosFiltrados.map(aluno => (
@@ -109,6 +111,7 @@ export function Alunos() {
                         <td>{aluno.matricula}</td>
                         <td>{aluno.nome}</td>
                         <td>{aluno.turma}</td>
+                        <td>{aluno.email}</td>
                         <td>
                             <span style={{ color: aluno.status === 'Ativo' ? 'green' : 'red', fontWeight: 'bold' }}>
                                 {aluno.status}
@@ -143,12 +146,15 @@ export function Alunos() {
                             value={editData.nome}
                             onChange={e => setEditData({ ...editData, nome: e.target.value })}
                         />
-                        <Input
+                        <Select
                             label="Turma"
                             required
-                            value={editData.turma}
-                            onChange={e => setEditData({ ...editData, turma: e.target.value })}
-                        />
+                            value={editData.turmaId}
+                            onChange={e => setEditData({ ...editData, turmaId: e.target.value })}
+                        >
+                            <option value="">Selecione...</option>
+                            {turmas.map(t => <option key={t.nome} value={t.nome}>{t.nome}</option>)}
+                        </Select>
                         <Select
                             label="Status"
                             value={editData.status}
@@ -187,12 +193,22 @@ export function Alunos() {
                                 onChange={e => setNovoAluno({ ...novoAluno, nome: e.target.value })}
                             />
                             <Input
-                                label="Turma"
-                                placeholder="Ex: 9º Ano A"
+                                label="E-mail"
+                                type="email"
+                                placeholder="Ex: aluno@escola.com"
                                 required
-                                value={novoAluno.turma}
-                                onChange={e => setNovoAluno({ ...novoAluno, turma: e.target.value })}
+                                value={novoAluno.email}
+                                onChange={e => setNovoAluno({ ...novoAluno, email: e.target.value })}
                             />
+                           <Select
+                                label="Turma"
+                                required
+                                value={novoAluno.turmaId}
+                                onChange={e => setNovoAluno({ ...novoAluno, turmaId: e.target.value })}
+                            >
+                                <option value="">Selecione...</option>
+                                {turmas.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
+                            </Select>
                             <Select
                                 label="Status"
                                 value={novoAluno.status}

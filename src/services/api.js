@@ -75,6 +75,9 @@ let _mockNotifications = [
     }
 ];
 
+// ============================
+// LOGIN USUÁRIO
+// ============================
 export async function loginUser(email, senha) {
     const response = await api.post('/auth/login', { email, senha }, {
         baseURL: 'http://localhost:5051'
@@ -82,56 +85,55 @@ export async function loginUser(email, senha) {
     return response.data;
 }
 
-/**
- * @param {string} filter
- * @returns {Promise<Array>}
- */
-export async function getStudents(filter = '') {
-    await simulateNetworkDelay(250);
-    
-    const lowerCaseFilter = filter.toLowerCase();
-    
-    const filteredData = _mockStudentData.filter(student => {
-        return (
-            student.nome.toLowerCase().includes(lowerCaseFilter) ||
-            student.turma.toLowerCase().includes(lowerCaseFilter) ||
-            student.matricula.includes(lowerCaseFilter)
-        );
-    });
-    
-    return Promise.resolve(filteredData);
+// ============================
+// CRUD ALUNOS
+// ============================
+export async function getStudents() {
+    const response = await api.get('/alunos');
+
+    return response.data.map(a => ({
+        id: a.id,
+        matricula: a.matricula,
+        nome: a.nome,
+        turma: a.turma,
+        email: a.email,
+        status: a.ativo ? 'Ativo' : 'Inativo',
+    }));
 }
 
-/**
- * @param {object} studentData
- * @returns {Promise<object>}
- */
 export async function addStudent(studentData) {
-    await simulateNetworkDelay(500);
-    
-    _mockStudentData.push(studentData);
-    
-    return Promise.resolve(studentData);
+    const payload = {
+        nome: studentData.nome,
+        matricula: studentData.matricula,
+        email: studentData.email || `${studentData.matricula}@escola.com`,
+        turmaId: studentData.turmaId,
+        ativo: studentData.status !== 'Inativo',
+    };
+    const response = await api.post('/alunos', payload);
+    return response.data;
 }
 
-export async function editStudent(matricula, newData) {
-    await simulateNetworkDelay(400);
-    const student = _mockStudentData.find(s => s.matricula === matricula);
-    if (!student) return Promise.reject("Aluno não encontrado");
-    Object.assign(student, newData);
-    return Promise.resolve(true);
+export async function editStudent(id, newData) {
+    const payload = {
+        nome: newData.nome,
+        turmaId: newData.turmaId,
+        ativo: newData.status !== 'Inativo',
+    };
+    const response = await api.put(`/alunos/${id}`, payload);
+    return response.data;
 }
 
-/**
- * @param {string} studentId
- * @returns {Promise<boolean>}
- */
-export async function deleteStudent(studentId) {
-    await simulateNetworkDelay(400);
-    
-    _mockStudentData = _mockStudentData.filter(student => student.matricula !== studentId);
-    
-    return Promise.resolve(true);
+export async function deleteStudent(id) {
+    await api.delete(`/alunos/${id}`);
+    return true;
+}
+
+// ============================
+// CRUD TURMAS
+// ============================
+export async function getClasses() {
+    const response = await api.get('/turmas');
+    return response.data;
 }
 
 export async function getTeachers() {
@@ -248,12 +250,6 @@ export async function getStudentGrades() {
 export async function getAbsenceData() {
     await simulateNetworkDelay(300);
     return Promise.resolve(_mockAbsenceData);
-}
-
-export async function getClasses() {
-    return new Promise(resolve => {
-        setTimeout(() => resolve(['9º Ano A', '9º Ano B', '1º Ano EM', '2º Ano EM', '3º Ano EM']), 200);
-    });
 }
 
 export async function saveAttendance(payload) {
