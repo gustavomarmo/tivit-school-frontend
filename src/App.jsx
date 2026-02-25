@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { DialogProvider } from './contexts/DialogContext';
@@ -20,8 +20,14 @@ import { AprovacaoMatriculas } from './pages/AprovacaoMatriculas';
 
 
 function PrivateRoute({ children }) {
-  const { userRole } = useContext(AuthContext);
-  return userRole ? children : <Navigate to="/login" />;
+    const { userRole, loadingSession } = useContext(AuthContext);
+
+    if (loadingSession) {
+        return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            Carregando...
+        </div>;
+    }
+    return userRole ? children : <Navigate to="/login" />;
 }
 
 function App() {

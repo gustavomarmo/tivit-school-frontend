@@ -1,58 +1,62 @@
 import { createContext, useState, useEffect, useContext } from 'react';
+import { loginUser } from '../services/api';
+import { decodeToken, mapRole } from '../utils/tokenUtils';
 
 export const AuthContext = createContext({});
 
 export function AuthProvider({ children }) {
-    const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || null );
-    const [user, setUser] = useState({
-        name: 'Gustavo Marmo',
-        photo: 'IMG_8792.jpg'
-    });
+    const [userRole, setUserRole] = useState(null);
+    const [user, setUser] = useState(null);
+    const [loadingSession, setLoadingSession] = useState(true);
 
     useEffect(() => {
-        if (userRole) {
-            localStorage.setItem('userRole', userRole);
-            localStorage.setItem('userName', user.name);
-        } else {
-            localStorage.removeItem('userRole');
-            localStorage.removeItem('userName');
+        const token = localStorage.getItem('token');
+        if (token) {
+            const decoded = decodeToken(token);
+            if (decoded) {
+                setUser({
+                    id: decoded.id,
+                    name: decoded.name,
+                    email: decoded.email,
+                    fotoUrl: localStorage.getItem('fotoUrl') ?? null,
+                });
+                setUserRole(mapRole(decoded.role));
+            } else {
+                localStorage.clear();
+            }
         }
-    }, [userRole, user]);
+        setLoadingSession(false);
+    }, []);
 
-    function signIn(email, password) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                if (password === '123456') {
-                    if (email.includes('aluno')) {
-                        setUser({ name: 'Gustavo Marmo', photo: 'IMG_8792.jpg' });
-                        setUserRole('aluno');
-                        resolve('aluno');
-                    } else if (email.includes('prof')) {
-                        setUser({ name: 'Prof. Silva', photo: 'IMG_5116.jpg' });
-                        setUserRole('professor');
-                        resolve('professor');
-                    } else if (email.includes('coord')) {
-                        setUser({ name: 'Coord. Ana', photo: 'Logo Edu Connect.png' });
-                        setUserRole('coordenador');
-                        resolve('coordenador');
-                    } else {
-                        reject('Usuário não encontrado. Use "aluno", "prof" ou "coord" no email.');
-                    }
-                } else {
-                    reject('Senha incorreta (Dica: é 123456)');
-                }
-            }, 500);
+    async function signIn(email, senha) {
+        const data = await loginUser(email, senha);
+
+        localStorage.setItem('token', data.token);
+        if (data.fotoUrl) localStorage.setItem('fotoUrl', data.fotoUrl);
+
+        const decoded = decodeToken(data.token);
+        const role = mapRole(decoded?.role ?? data.perfil);
+
+        setUser({
+            id: decoded?.id,
+            name: data.nome,
+            email: data.email,
+            fotoUrl: data.fotoUrl ?? null,
         });
+        setUserRole(role);
+
+        return role;
     }
 
     function logout() {
+        localStorage.clear();
         setUserRole(null);
         setUser(null);
-        window.location.href = "/login";
+        window.location.href = '/login';
     }
 
     return (
-        <AuthContext.Provider value={{ userRole, user, signIn, logout }}>
+        <AuthContext.Provider value={{ userRole, user, signIn, logout, loadingSession }}>
             {children}
         </AuthContext.Provider>
     );

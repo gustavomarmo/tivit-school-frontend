@@ -74,6 +74,12 @@ let _mockNotifications = [
     }
 ];
 
+export async function loginUser(email, senha) {
+    const response = await api.post('/auth/login', { email, senha }, {
+        baseURL: 'http://localhost:5051'
+    });
+    return response.data;
+}
 
 /**
  * @param {string} filter

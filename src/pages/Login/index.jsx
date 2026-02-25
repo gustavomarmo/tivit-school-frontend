@@ -22,8 +22,14 @@ export function Login() {
         try {
             await signIn(email, password);
             navigate('/');
-        } catch (msg) {
-            setError(msg);
+        } catch (err) {
+            if (err.response?.status === 401) {
+                setError('E-mail ou senha inválidos.');
+            } else if (err.response?.data?.message) {
+                setError(err.response.data.message);
+            } else {
+                setError('Não foi possível conectar ao servidor. Tente novamente.');
+            }
         } finally {
             setLoading(false);
         }
