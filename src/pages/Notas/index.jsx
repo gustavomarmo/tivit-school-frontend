@@ -36,12 +36,12 @@ export function Notas() {
             nome: a.nome ?? '',
             matricula: a.matricula ?? '',
             alunoId: a.alunoId,
-            n1_b1: a.n1_B1 ?? '',
-            n2_b1: a.n2_B1 ?? '',
-            af_b1: a.ativ_B1 ?? '',
-            n1_b2: a.n1_B2 ?? '',
-            n2_b2: a.n2_B2 ?? '',
-            af_b2: a.ativ_B2 ?? '',
+            n1_b1: a.n1b1 ?? '',
+            n2_b1: a.n2b1 ?? '',
+            af_b1: a.ativb1 ?? '',
+            n1_b2: a.n1b2 ?? '',
+            n2_b2: a.n2b2 ?? '',
+            af_b2: a.ativb2 ?? '',
         })));
         setListVisible(true);
         setLoading(false);
