@@ -219,7 +219,7 @@ export async function addTopicToSubject(subject, topicTitle) {
     return response.data;
 }
 
-export async function editTopicFromSubject(_subject, topicId, newTitle) {
+export async function editTopicFromSubject(topicId, newTitle) {
     await api.put(`/topicos/${topicId}`, {
         titulo: newTitle,
         turmaDisciplinaId: 0,
@@ -227,7 +227,7 @@ export async function editTopicFromSubject(_subject, topicId, newTitle) {
     return true;
 }
 
-export async function deleteTopicFromSubject(_subject, topicId) {
+export async function deleteTopicFromSubject(topicId) {
     await api.delete(`/topicos/${topicId}`);
     return true;
 }
@@ -235,7 +235,7 @@ export async function deleteTopicFromSubject(_subject, topicId) {
 // ============================
 // CRUD MATERIAIS
 // ============================
-export async function addSubjectResource(_subject, moduleId, recurso) {
+export async function addSubjectResource(moduleId, recurso) {
     await api.post('/materiais', {
         titulo: recurso.title,
         tipo: recurso.type,
@@ -245,7 +245,7 @@ export async function addSubjectResource(_subject, moduleId, recurso) {
     return { success: true };
 }
 
-export async function editMaterialFromSubject(_subject, _topicId, itemId, newData) {
+export async function editMaterialFromSubject(itemId, newData) {
     await api.put(`/materiais/${itemId}`, {
         titulo: newData.nome,
         tipo: newData.type,
@@ -255,7 +255,7 @@ export async function editMaterialFromSubject(_subject, _topicId, itemId, newDat
     return true;
 }
 
-export async function deleteMaterialFromSubject(_subject, _topicId, itemId) {
+export async function deleteMaterialFromSubject(itemId) {
     await api.delete(`/materiais/${itemId}`);
     return true;
 }

@@ -72,7 +72,7 @@ export function Materias() {
             toast('Preencha o título e o link/arquivo.', 'warning');
             return;
         }
-        await addSubjectResource(selectedSubject, newActivity.moduleId, newActivity);
+        await addSubjectResource(newActivity.moduleId, newActivity);
         toast('Atividade adicionada com sucesso!', 'success');
         setIsModalOpen(false);
         setNewActivity({ ...newActivity, title: '', desc: '', url: '' });
@@ -100,7 +100,7 @@ export function Materias() {
     async function handleDeleteTopic(module) {
         const ok = await confirm(`Deletar o tópico "${module.titulo}" e todo seu conteúdo?`);
         if (!ok) return;
-        await deleteTopicFromSubject(selectedSubject, module.id);
+        await deleteTopicFromSubject(module.id);
         toast('Tópico removido.', 'success');
         carregarConteudo();
     }
@@ -115,7 +115,7 @@ export function Materias() {
         if (!editTopicTitle.trim()) return;
         setSavingEditTopic(true);
         try {
-            await editTopicFromSubject(selectedSubject, editingTopic.id, editTopicTitle.trim());
+            await editTopicFromSubject(editingTopic.id, editTopicTitle.trim());
             toast('Tópico atualizado!', 'success');
             setEditingTopic(null);
             carregarConteudo();
@@ -130,7 +130,7 @@ export function Materias() {
     async function handleDeleteItem(topicId, item) {
         const ok = await confirm(`Deletar a atividade "${item.nome}"?`);
         if (!ok) return;
-        await deleteMaterialFromSubject(selectedSubject, topicId, item.id);
+        await deleteMaterialFromSubject(item.id);
         toast('Atividade removida.', 'success');
         carregarConteudo();
     }
@@ -145,7 +145,7 @@ export function Materias() {
         if (!editItemData.nome.trim()) return;
         setSavingEditItem(true);
         try {
-            await editMaterialFromSubject(selectedSubject, editingItem.topicId, editingItem.item.id, editItemData);
+            await editMaterialFromSubject(editingItem.item.id, editItemData);
             toast('Atividade atualizada!', 'success');
             setEditingItem(null);
             carregarConteudo();
