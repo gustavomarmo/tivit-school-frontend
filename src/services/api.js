@@ -286,9 +286,9 @@ export async function downloadBoletimPdf() {
     window.URL.revokeObjectURL(url);
 }
 
-export async function getNotasParaLancamento(turmaId, disciplinaId, bimestre) {
+export async function getNotasParaLancamento(turmaId, disciplinaId) {
     const response = await api.get('/notas/lancamento', {
-        params: { turmaId, disciplinaId, bimestre }
+        params: { turmaId, disciplinaId}
     });
     return response.data;
 }
