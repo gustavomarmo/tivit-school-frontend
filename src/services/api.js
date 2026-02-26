@@ -91,11 +91,14 @@ export async function loginUser(email, senha) {
 export async function getStudents() {
     const response = await api.get('/alunos');
 
+    console.log(response.data[0])
+
     return response.data.map(a => ({
         id: a.id,
         matricula: a.matricula,
         nome: a.nome,
         turma: a.turma,
+        turmaId: a.turmaId,
         email: a.email,
         status: a.ativo ? 'Ativo' : 'Inativo',
     }));
@@ -133,6 +136,7 @@ export async function deleteStudent(id) {
 // ============================
 export async function getClasses() {
     const response = await api.get('/turmas');
+    console.log('Turmas retornadas:', response.data);
     return response.data;
 }
 
