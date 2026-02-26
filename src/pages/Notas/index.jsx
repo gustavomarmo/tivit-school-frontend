@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getClasses, getSubjectsList, getStudents, saveGrades } from '../../services/api';
+import { getClasses, getSubjectsList, getNotasParaLancamento, salvarNotasLote } from '../../services/api';
 import { useDialog } from '../../contexts/DialogContext';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -30,10 +30,13 @@ export function Notas() {
             return;
         }
         setLoading(true);
-        const dados = await getStudents();
+        const dados = await getNotasParaLancamento(filtro.turma, filtro.materia, 1);
         setAlunos(dados.map(a => ({
             ...a,
-            n1_b1: '', n2_b1: '', af_b1: '',
+            nome: a.Nome,
+            matricula: a.Matricula,
+            alunoId: a.AlunoId,
+            n1_b1: a.N1 ?? '', n2_b1: a.N2 ?? '', af_b1: a.Ativ ?? '',
             n1_b2: '', n2_b2: '', af_b2: ''
         })));
         setListVisible(true);
@@ -52,15 +55,19 @@ export function Notas() {
     }
 
     async function handleSave() {
-        const payload = {
-            ...filtro,
-            notas: alunos.map(a => ({
-                matricula: a.matricula,
-                b1: { n1: a.n1_b1, n2: a.n2_b1, af: a.af_b1 },
-                b2: { n1: a.n1_b2, n2: a.n2_b2, af: a.af_b2 }
-            }))
-        };
-        await saveGrades(payload);
+        const turmaId = Number(filtro.turma);
+        const disciplinaId = Number(filtro.materia);
+
+        const payload = alunos.flatMap(a => [
+            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 1, Tipo: 'N1', Valor: Number(a.n1_b1) || 0 },
+            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 1, Tipo: 'N2', Valor: Number(a.n2_b1) || 0 },
+            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 1, Tipo: 'Ativ', Valor: Number(a.af_b1) || 0 },
+            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 2, Tipo: 'N1', Valor: Number(a.n1_b2) || 0 },
+            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 2, Tipo: 'N2', Valor: Number(a.n2_b2) || 0 },
+            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 2, Tipo: 'Ativ', Valor: Number(a.af_b2) || 0 },
+        ]);
+
+        await salvarNotasLote(payload);
         toast('Notas lançadas com sucesso!', 'success');
         setListVisible(false);
         setFiltro({ turma: '', materia: '' });
@@ -82,7 +89,7 @@ export function Notas() {
                         onChange={e => setFiltro({...filtro, materia: e.target.value})}
                     >
                         <option value="">Selecione...</option>
-                        {materias.map(m => <option key={m} value={m}>{m}</option>)}
+                        {materias.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
                     </Select>
 
                     <Select 
@@ -91,7 +98,7 @@ export function Notas() {
                         onChange={e => setFiltro({...filtro, turma: e.target.value})}
                     >
                         <option value="">Selecione...</option>
-                        {turmas.map(t => <option key={t} value={t}>{t}</option>)}
+                        {turmas.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
                     </Select>
 
                     <Button onClick={handleBuscar}>

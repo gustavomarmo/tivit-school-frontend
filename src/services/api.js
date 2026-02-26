@@ -260,6 +260,57 @@ export async function deleteMaterialFromSubject(itemId) {
     return true;
 }
 
+// ============================
+// NOTAS E BOLETIM
+// ============================
+export async function getBoletim() {
+    const response = await api.get('/notas/boletim');
+    return response.data;
+}
+
+export async function downloadBoletimPdf() {
+    const response = await api.get('/notas/boletim/download', {
+        responseType: 'blob',
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'meu_boletim.pdf');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+}
+
+export async function getNotasParaLancamento(turmaId, disciplinaId, bimestre) {
+    const response = await api.get('/notas/lancamento', {
+        params: { turmaId, disciplinaId, bimestre }
+    });
+    return response.data;
+}
+
+export async function salvarNotasLote(notas) {
+    const response = await api.post('/notas/lote', notas);
+    return response.data;
+}
+
+// ============================
+// FREQUÊNCIA
+// ============================
+export async function getFrequenciaResumo() {
+    const response = await api.get('/frequencias/resumo');
+    return response.data;
+}
+
+export async function realizarChamada(disciplinaId, data, registros) {
+    const response = await api.post('/frequencias/chamada', {
+        disciplinaId,
+        data,
+        registros,
+    });
+    return response.data;
+}
+
 export async function getCalendarEvents() {
     return new Promise((resolve) => {
         setTimeout(() => {
@@ -322,18 +373,6 @@ export async function updateCalendarEvent(date, oldTitle, newTitle) {
     }
 
     return Promise.resolve(true);
-}
-
-export async function getStudentGrades() {
-    return new Promise(resolve => {
-        setTimeout(() => resolve([
-            { materia: 'Matemática', n1_n1: 8.0, n1_n2: 7.5, n1_ativ: 9.0, n2_n1: 6.5, n2_n2: 7.0, n2_ativ: 8.0 },
-            { materia: 'Português', n1_n1: 9.0, n1_n2: 8.5, n1_ativ: 10.0, n2_n1: 9.0, n2_n2: 9.5, n2_ativ: 9.0 },
-            { materia: 'História', n1_n1: 7.0, n1_n2: 6.5, n1_ativ: 8.0, n2_n1: 7.5, n2_n2: 8.0, n2_ativ: 7.0 },
-            { materia: 'Geografia', n1_n1: 8.5, n1_n2: 8.0, n1_ativ: 9.0, n2_n1: 8.0, n2_n2: 7.5, n2_ativ: 8.5 },
-            { materia: 'Ciências', n1_n1: 6.0, n1_n2: 5.5, n1_ativ: 7.0, n2_n1: 7.0, n2_n2: 6.5, n2_ativ: 8.0 },
-        ]), 400);
-    });
 }
 
 /**

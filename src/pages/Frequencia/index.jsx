@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getClasses, getSubjectsList, getStudents, saveAttendance } from '../../services/api';
+import { getClasses, getSubjectsList, getStudents, realizarChamada } from '../../services/api';
 import { useDialog } from '../../contexts/DialogContext';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -29,8 +29,10 @@ export function Frequencia() {
             return;
         }
         setLoading(true);
-        const dados = await getStudents();
-        setAlunos(dados.map(a => ({ ...a, presente: true })));
+
+        const todos = await getStudents();
+        const daTurma = todos.filter(a => String(a.turmaId) === String(filtro.turma) || a.turma === filtro.turma);
+        setAlunos(daTurma.map(a => ({ ...a, presente: true })));
         setListVisible(true);
         setLoading(false);
     }
@@ -42,12 +44,16 @@ export function Frequencia() {
     }
 
     async function handleSubmit() {
-        const payload = {
-            ...filtro,
-            data: new Date().toISOString().split('T')[0],
-            frequencia: alunos.map(a => ({ matricula: a.matricula, presente: a.presente }))
-        };
-        await saveAttendance(payload);
+        const registros = alunos.map(a => ({
+            alunoId: a.id,
+            presente: a.presente,
+        }));
+
+        await realizarChamada(
+            Number(filtro.materia),
+            new Date().toISOString(),  
+            registros
+        );
         toast('Frequência registrada com sucesso!', 'success');
         setListVisible(false);
         setFiltro({ turma: '', materia: '', horario: '' });
@@ -65,7 +71,7 @@ export function Frequencia() {
                         onChange={e => setFiltro({...filtro, materia: e.target.value})}
                     >
                         <option value="">Selecione...</option>
-                        {materias.map(m => <option key={m} value={m}>{m}</option>)}
+                        {materias.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
                     </Select>
 
                     <Select 
@@ -74,7 +80,7 @@ export function Frequencia() {
                         onChange={e => setFiltro({...filtro, turma: e.target.value})}
                     >
                         <option value="">Selecione...</option>
-                        {turmas.map(t => <option key={t} value={t}>{t}</option>)}
+                        {turmas.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
                     </Select>
 
                     <Select 

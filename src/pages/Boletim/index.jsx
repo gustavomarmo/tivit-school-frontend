@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getStudentGrades } from '../../services/api';
+import { getBoletim, downloadBoletimPdf } from '../../services/api';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
 import styles from './Boletim.module.css';
@@ -67,20 +67,35 @@ export function Boletim() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function carregar() {
-            const data = await getStudentGrades();
-            setNotas(data);
+    async function carregar() {
+            const data = await getBoletim();
+            setNotas(data.map(item => ({
+                materia: item.Materia,
+                n1_n1: item.n1_n1 ?? 0,
+                n1_n2: item.n1_n2 ?? 0,
+                n1_ativ: item.n1_ativ ?? 0,
+                n2_n1: item.n2_n1 ?? 0,
+                n2_n2: item.n2_n2 ?? 0,
+                n2_ativ: item.n2_ativ ?? 0,
+            })));
             setLoading(false);
         }
         carregar();
     }, []);
 
+    async function handleDownloadPdf() {
+        try {
+            await downloadBoletimPdf();
+        } catch {
+        }
+    }
+
     return (
         <div className={styles.container}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h1>Boletim Escolar</h1>
-                <Button onClick={() => window.print()} variant="secondary">
-                    <i className="fa-solid fa-print"></i> Imprimir
+                <Button onClick={handleDownloadPdf}>
+                    <i className="fa-solid fa-file-pdf"></i> Baixar PDF
                 </Button>
             </div>
 
