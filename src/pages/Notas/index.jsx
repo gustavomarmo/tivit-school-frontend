@@ -33,9 +33,9 @@ export function Notas() {
         const dados = await getNotasParaLancamento(filtro.turma, filtro.materia, 1);
         setAlunos(dados.map(a => ({
             ...a,
-            nome: a.Nome,
-            matricula: a.Matricula,
-            alunoId: a.AlunoId,
+            nome: a.nome,
+            matricula: a.matricula,
+            alunoId: a.alunoId,
             n1_b1: a.N1 ?? '', n2_b1: a.N2 ?? '', af_b1: a.Ativ ?? '',
             n1_b2: '', n2_b2: '', af_b2: ''
         })));
@@ -98,7 +98,7 @@ export function Notas() {
                         onChange={e => setFiltro({...filtro, turma: e.target.value})}
                     >
                         <option value="">Selecione...</option>
-                        {turmas.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
+                        {turmas.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)} //
                     </Select>
 
                     <Button onClick={handleBuscar}>
