@@ -315,68 +315,49 @@ export async function realizarChamada(disciplinaId, data, registros) {
     return response.data;
 }
 
-export async function getCalendarEvents() {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            
-            resolve({
-                [`${year}-${month}-05`]: ['Entrega de Trabalho'],
-                [`${year}-${month}-12`]: ['Prova de Matemática'],
-                [`${year}-${month}-15`]: ['Feriado Escolar'],
-                [`${year}-${month}-20`]: ['Reunião de Pais', 'Conselho de Classe'],
-                [`${year}-${month}-25`]: ['Feira de Ciências']
-            });
-        }, 300);
+// ============================
+// CALENDÁRIO / EVENTOS
+// ============================
+export async function getCalendarEvents(mes, ano) {
+    const response = await api.get('/eventos', {
+        params: { mes, ano }
     });
+    const dict = {};
+    for (const evt of response.data) {
+        const dateKey = evt.start.substring(0, 10);
+        if (!dict[dateKey]) dict[dateKey] = [];
+        dict[dateKey].push({ id: evt.id, title: evt.title, type: evt.type });
+    }
+    return dict;
 }
 
-/**
- * @param {string} date
- * @param {string} title
- * @returns {Promise<boolean>}
- */
 export async function saveCalendarEvent(date, title) {
-    await simulateNetworkDelay(300);
-    
-    if (!_calendarEvents[date]) {
-        _calendarEvents[date] = [];
-    }
-    _calendarEvents[date].push(title);
-    
-    localStorage.setItem('calendarEvents', JSON.stringify(_calendarEvents));
-    
-    return Promise.resolve(true);
+    const response = await api.post('/eventos', {
+        titulo: title,
+        descricao: '',
+        dataInicio: `${date}T00:00:00`,
+        dataFim: null,
+        tipo: 'evento',
+        turmaId: null
+    });
+    return response.data;
 }
 
-export async function deleteCalendarEvent(date, title) {
-    await simulateNetworkDelay(300);
-
-    if (_calendarEvents[date]) {
-        _calendarEvents[date] = _calendarEvents[date].filter(t => t !== title);
-        if (_calendarEvents[date].length === 0) {
-            delete _calendarEvents[date];
-        }
-        localStorage.setItem('calendarEvents', JSON.stringify(_calendarEvents));
-    }
-
-    return Promise.resolve(true);
+export async function updateCalendarEvent(date, eventId, newTitle) {
+    await api.put(`/eventos/${eventId}`, {
+        titulo: newTitle,
+        descricao: '',
+        dataInicio: `${date}T00:00:00`,
+        dataFim: null,
+        tipo: 'evento',
+        turmaId: null
+    });
+    return true;
 }
 
-export async function updateCalendarEvent(date, oldTitle, newTitle) {
-    await simulateNetworkDelay(300);
-
-    if (_calendarEvents[date]) {
-        const index = _calendarEvents[date].indexOf(oldTitle);
-        if (index > -1) {
-            _calendarEvents[date][index] = newTitle;
-            localStorage.setItem('calendarEvents', JSON.stringify(_calendarEvents));
-        }
-    }
-
-    return Promise.resolve(true);
+export async function deleteCalendarEvent(eventId) {
+    await api.delete(`/eventos/${eventId}`);
+    return true;
 }
 
 /**

@@ -22,18 +22,18 @@ export function Calendario() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedEvent, setSelectedEvent] = useState(null);
 
-    useEffect(() => {
-        loadEvents();
-    }, []);
-
     async function loadEvents() {
-        const data = await getCalendarEvents();
+        const data = await getCalendarEvents(month + 1, year);
         setEvents(data);
         setLoading(false);
     }
-
+    
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
+
+    useEffect(() => {
+        loadEvents();
+    }, [month, year]);
 
     function prevMonth() {
         setCurrentDate(new Date(year, month - 1, 1));
@@ -80,9 +80,9 @@ export function Calendario() {
         setModalOpen(true);
     }
 
-    function openEditModal(dateKey, eventTitle) {
+    function openEditModal(dateKey, eventObj) {
         setSelectedDate(dateKey);
-        setSelectedEvent(eventTitle);
+        setSelectedEvent(eventObj);
         setModalOpen(true);
     }
 
@@ -94,7 +94,7 @@ export function Calendario() {
 
     async function handleSave(title) {
         if (selectedEvent) {
-            await updateCalendarEvent(selectedDate, selectedEvent, title);
+            await updateCalendarEvent(selectedDate, selectedEvent.id, title);
         } else {
             await saveCalendarEvent(selectedDate, title);
         }
@@ -103,7 +103,7 @@ export function Calendario() {
     }
 
     async function handleDelete() {
-        await deleteCalendarEvent(selectedDate, selectedEvent);
+        await deleteCalendarEvent(selectedEvent.id);
         closeModal();
         loadEvents();
     }
@@ -159,10 +159,11 @@ export function Calendario() {
                                 day={item.day}
                                 type={item.type}
                                 isToday={isDayToday}
-                                events={dayEvents}
+                                events={dayEvents.map(e => e.title)}
                                 onClick={() => item.type === 'current' && openCreateModal(dateKey)}
-                                onEventClick={(eventTitle) => openEditModal(dateKey, eventTitle)}
-                            />
+                                onEventClick={(eventTitle) => {const evt = dayEvents.find(e => e.title === eventTitle);
+                                openEditModal(dateKey, evt);}}>   
+                            </CalendarDay>
                         );
                     })
                 )}
@@ -174,7 +175,7 @@ export function Calendario() {
                 onSave={handleSave}
                 onDelete={handleDelete}
                 selectedDate={selectedDate}
-                selectedEvent={selectedEvent}
+                selectedEvent={selectedEvent?.title ?? null}
             />
         </div>
     );
