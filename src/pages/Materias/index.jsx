@@ -17,6 +17,7 @@ import { IconButton } from '../../components/IconButton';
 import { Modal } from '../../components/Modal';
 import { Input } from '../../components/Form/Input';
 import { Select } from '../../components/Form/Select';
+import { ExerciciosModal } from '../../components/ExerciciosModal';
 import styles from './Materias.module.css';
 
 export function Materias() {
@@ -45,6 +46,8 @@ export function Materias() {
     const [savingEditItem, setSavingEditItem] = useState(false);
 
     const [viewContent, setViewContent] = useState(null);
+
+    const [exerciciosItem, setExerciciosItem] = useState(null);
 
     useEffect(() => {
         getSubjectsList().then(data => {
@@ -157,6 +160,13 @@ export function Materias() {
         }
     }
 
+    function isPdfItem(item) {
+        if (item.type !== 'file') return false;
+        const urlLower = (item.url || '').toLowerCase();
+        const nameLower = (item.nome || '').toLowerCase();
+        return urlLower.endsWith('.pdf') || nameLower.endsWith('.pdf');
+    }
+
     return (
         <div className={styles.container}>
             <aside className={styles.sidebarList}>
@@ -236,6 +246,33 @@ export function Materias() {
                                                         onOpen={() => setViewContent(item)}
                                                     />
                                                 </div>
+
+                                                <div
+                                                    title={
+                                                        !isPdfItem(item)
+                                                            ? 'Disponível apenas para arquivos PDF'
+                                                            : 'Criar exercícios com IA'
+                                                    }
+                                                    style={{ flexShrink: 0 }}
+                                                >
+                                                    <IconButton
+                                                        icon="fa-robot"
+                                                        title={
+                                                            !isPdfItem(item)
+                                                                ? 'Disponível apenas para arquivos PDF'
+                                                                : 'Criar Exercícios com IA'
+                                                        }
+                                                        variant="success"
+                                                        disabled={!isPdfItem(item)}
+                                                        onClick={() => setExerciciosItem(item)}
+                                                        style={
+                                                            !isPdfItem(item)
+                                                                ? { opacity: 0.35, cursor: 'not-allowed' }
+                                                                : {}
+                                                        }
+                                                    />
+                                                </div>
+
                                                 {isProfessor && (
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexShrink: 0 }}>
                                                         <IconButton icon="fa-pen" title="Editar atividade" onClick={() => openEditItem(module.id, item)} />
@@ -251,6 +288,12 @@ export function Materias() {
                     )
                 )}
             </main>
+
+            <ExerciciosModal
+                isOpen={!!exerciciosItem}
+                onClose={() => setExerciciosItem(null)}
+                material={exerciciosItem}
+            />
 
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Adicionar Nova Atividade">
                 <form onSubmit={handleAddActivity}>
