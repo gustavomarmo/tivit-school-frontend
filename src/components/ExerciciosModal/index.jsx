@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Button } from '../Button';
 import styles from './ExerciciosModal.module.css';
+import * as pdfjsLib from 'pdfjs-dist';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 function parseQuestions(rawText) {
     const blocks = rawText.split(/(?=Questão\s+\d+[:.]?)/i).filter(b => b.trim());
@@ -40,108 +43,110 @@ export function ExerciciosModal({ isOpen, onClose, material }) {
 
     if (!isOpen) return null;
 
-    async function handleGenerate() {
-        setLoading(true);
-        setError('');
-        setQuestions([]);
-        setShowAnswers(false);
-        setGenerated(false);
+        async function handleGenerate() {
+            setLoading(true);
+            setError('');
+            setQuestions([]);
+            setShowAnswers(false);
+            setGenerated(false);
 
-        try {
-            const pdfResponse = await fetch(material.url);
-            if (!pdfResponse.ok) throw new Error('Não foi possível baixar o arquivo PDF.');
-            const pdfBlob = await pdfResponse.blob();
+            try {
+                let pdfText = '';
 
-            const base64 = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result.split(',')[1]);
-                reader.onerror = reject;
-                reader.readAsDataURL(pdfBlob);
-            });
+                const fileData = material.fileObject instanceof File
+                    ? material.fileObject
+                    : null;
 
-            const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+                if (!fileData) {
+                    throw new Error('Arquivo PDF não encontrado em memória. Feche e adicione o material novamente.');
+                }
 
-            const groqPayload = {
-                model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-                messages: [
-                    {
-                        role: 'system',
-                        content:
-                            'Você é um professor experiente. Seu trabalho é ler materiais pedagógicos em PDF e criar exercícios de múltipla escolha de alta qualidade para os alunos. Responda APENAS com as questões, sem introduções ou despedidas.',
+                const arrayBuffer = await fileData.arrayBuffer();
+
+                const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const maxPages = Math.min(pdfDoc.numPages, 10);
+
+                for (let i = 1; i <= maxPages; i++) {
+                    const page = await pdfDoc.getPage(i);
+                    const content = await page.getTextContent();
+                    const pageText = content.items.map(item => item.str).join(' ');
+                    pdfText += pageText + '\n';
+                }
+
+                if (!pdfText.trim()) {
+                    throw new Error('Não foi possível extrair texto do PDF. O arquivo pode ser uma imagem escaneada.');
+                }
+
+                const truncatedText = pdfText.slice(0, 8000);
+
+                const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+
+                const groqPayload = {
+                    model: 'llama-3.3-70b-versatile',
+                    messages: [
+                        {
+                            role: 'system',
+                            content:
+                                'Você é um professor experiente. Leia o conteúdo do material abaixo e crie exercícios de múltipla escolha de alta qualidade. Responda APENAS com as questões, sem introduções ou despedidas.',
+                        },
+                        {
+                            role: 'user',
+                            content: `Com base no conteúdo abaixo, crie exatamente 5 questões de múltipla escolha (a, b, c, d).
+
+        Formato OBRIGATÓRIO:
+
+        Questão 1: <enunciado>
+        a) <alternativa>
+        b) <alternativa>
+        c) <alternativa>
+        d) <alternativa>
+        Resposta: <letra correta>
+
+        Questão 2: ...
+
+        Conteúdo do material:
+        ${truncatedText}`,
+                        },
+                    ],
+                    temperature: 0.4,
+                    max_tokens: 1800,
+                };
+
+                const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${GROQ_API_KEY}`,
                     },
-                    {
-                        role: 'user',
-                        content: [
-                            {
-                                type: 'text',
-                                text: `Com base no conteúdo do PDF anexado, crie exatamente 5 questões de múltipla escolha (a, b, c, d) sobre os conceitos principais abordados no material.
+                    body: JSON.stringify(groqPayload),
+                });
 
-Formato OBRIGATÓRIO para cada questão (siga à risca):
+                if (!groqRes.ok) {
+                    const errBody = await groqRes.json().catch(() => ({}));
+                    throw new Error(errBody?.error?.message || `Erro Groq: ${groqRes.status}`);
+                }
 
-Questão 1: <enunciado da questão>
-a) <alternativa>
-b) <alternativa>
-c) <alternativa>
-d) <alternativa>
-Resposta: <letra correta>
+                const groqData = await groqRes.json();
+                const rawText = groqData.choices?.[0]?.message?.content || '';
 
-Questão 2: ...
+                if (!rawText.trim()) throw new Error('A IA não retornou conteúdo. Tente novamente.');
 
-Regras:
-- Enunciados claros e objetivos
-- Apenas UMA alternativa correta por questão
-- Alternativas plausíveis e relacionadas ao tema
-- Resposta indicada apenas pela letra (ex: Resposta: b)`,
-                            },
-                            {
-                                type: 'image_url',
-                                image_url: {
-                                    url: `data:application/pdf;base64,${base64}`,
-                                },
-                            },
-                        ],
-                    },
-                ],
-                temperature: 0.4,
-                max_tokens: 1800,
-            };
+                const parsed = parseQuestions(rawText);
+                if (parsed.length === 0) throw new Error('Não foi possível interpretar as questões geradas.');
 
-            const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${GROQ_API_KEY}`,
-                },
-                body: JSON.stringify(groqPayload),
-            });
-
-            if (!groqRes.ok) {
-                const errBody = await groqRes.json().catch(() => ({}));
-                throw new Error(errBody?.error?.message || `Erro Groq: ${groqRes.status}`);
+                setQuestions(parsed);
+                setGenerated(true);
+            } catch (err) {
+                setError(err.message || 'Ocorreu um erro inesperado.');
+            } finally {
+                setLoading(false);
             }
-
-            const groqData = await groqRes.json();
-            const rawText = groqData.choices?.[0]?.message?.content || '';
-
-            if (!rawText.trim()) throw new Error('A IA não retornou conteúdo. Tente novamente.');
-
-            const parsed = parseQuestions(rawText);
-            if (parsed.length === 0) throw new Error('Não foi possível interpretar as questões geradas.');
-
-            setQuestions(parsed);
-            setGenerated(true);
-        } catch (err) {
-            setError(err.message || 'Ocorreu um erro inesperado.');
-        } finally {
-            setLoading(false);
         }
-    }
 
     return (
         <div className={styles.overlay} onClick={onClose}>
             <div className={styles.modal} onClick={e => e.stopPropagation()}>
 
-                {/* Header */}
                 <div className={styles.header}>
                     <div className={styles.headerLeft}>
                         <div className={styles.headerIcon}>

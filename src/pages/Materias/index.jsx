@@ -49,6 +49,8 @@ export function Materias() {
 
     const [exerciciosItem, setExerciciosItem] = useState(null);
 
+    const [fileObjectsMap, setFileObjectsMap] = useState({});
+
     useEffect(() => {
         getSubjectsList().then(data => {
             setSubjects(data);
@@ -76,6 +78,14 @@ export function Materias() {
             return;
         }
         await addSubjectResource(newActivity.moduleId, newActivity);
+
+        if (newActivity.fileObject instanceof File) {
+            setFileObjectsMap(prev => ({
+                ...prev,
+                [newActivity.url]: newActivity.fileObject,
+            }));
+        }
+
         toast('Atividade adicionada com sucesso!', 'success');
         setIsModalOpen(false);
         setNewActivity({ ...newActivity, title: '', desc: '', url: '' });
@@ -264,7 +274,13 @@ export function Materias() {
                                                         }
                                                         variant="success"
                                                         disabled={!isPdfItem(item)}
-                                                        onClick={() => setExerciciosItem(item)}
+                                                        onClick={() => {
+                                                            const itemComFile = {
+                                                                ...item,
+                                                                fileObject: fileObjectsMap[item.url] || fileObjectsMap[item.nome] || null,
+                                                            };
+                                                            setExerciciosItem(itemComFile);
+                                                        }}
                                                         style={
                                                             !isPdfItem(item)
                                                                 ? { opacity: 0.35, cursor: 'not-allowed' }
@@ -311,7 +327,20 @@ export function Materias() {
                         {newActivity.type === 'file' ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                                 <label style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Arquivo</label>
-                                <input type="file" required onChange={e => setNewActivity({ ...newActivity, url: e.target.value })} />
+                                <input
+                                    type="file"
+                                    accept=".pdf,.doc,.docx"
+                                    required
+                                    onChange={e => {
+                                        const file = e.target.files[0];
+                                        if (!file) return;
+                                        setNewActivity({
+                                            ...newActivity,
+                                            url: file.name,
+                                            fileObject: file,
+                                        });
+                                    }}
+                                />
                             </div>
                         ) : (
                             <Input label="URL do Link / Vídeo" placeholder="https://..." type="url" required value={newActivity.url} onChange={e => setNewActivity({ ...newActivity, url: e.target.value })} />
