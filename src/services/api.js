@@ -461,22 +461,41 @@ export async function checarVaga(serie, turno) {
 
     const vagas = response.data;
 
-    const turnoNorm = turno.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const normalizar = (str) =>
+        (str ?? '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim()
+            .toLowerCase();
 
-    const vaga = vagas.find(
-        v => v.serie === serie &&
-             v.turno.toLowerCase() === turnoNorm.toLowerCase()
-    );
+    const serieNorm  = normalizar(serie);
+    const turnoNorm  = normalizar(turno);
+
+    const vaga = vagas.find(v => {
+        const vSerieNorm = normalizar(v.serie);
+        const vTurnoNorm = normalizar(v.turno);
+        console.log(`[checarVaga] Comparando: serie "${vSerieNorm}" === "${serieNorm}" | turno "${vTurnoNorm}" === "${turnoNorm}"`);
+        return vSerieNorm === serieNorm && vTurnoNorm === turnoNorm;
+    });
+
+    console.log('[checarVaga] Vaga encontrada:', vaga ?? 'NENHUMA');
 
     if (!vaga || !vaga.disponivel) {
-        return { disponivel: false };
+        return { disponivel: false, vagasRestantes: vaga?.vagasRestantes ?? 0 };
     }
 
-    return { disponivel: true, valor: vaga.valor };
+    return { disponivel: true, valor: vaga.valor, vagasRestantes: vaga.vagasRestantes };
 }
 
 export async function selecionarVaga(idSolicitacao, serie, turno) {
-    const turnoNorm = turno.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const turnoNorm = turno
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
+        .toLowerCase()
+        .replace(/^./, c => c.toUpperCase());
+
+    console.log('[selecionarVaga] Enviando turno normalizado:', turnoNorm, '| serie:', serie);
 
     const response = await api.put('/matriculas/selecionar-vaga', {
         SolicitacaoId: idSolicitacao,

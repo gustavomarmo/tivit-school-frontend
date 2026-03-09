@@ -30,25 +30,28 @@ export function AprovacaoMatriculas() {
         if (status === 'CONCLUIDO') return 'Matriculado';
         return status;
     };
-
+    
     async function handleAprovar() {
-        let novoStatus = '';
-        if (selectedMatricula.status === 'ANALISE_COORD') novoStatus = 'AGUARDANDO_PAGAMENTO';
-        else if (selectedMatricula.status === 'ANALISE_PIX') novoStatus = 'CONCLUIDO';
-        else return;
-
-        await avaliarMatriculaCoord(selectedMatricula.email, novoStatus);
-        ("Matrícula aprovada com sucesso!", "success");
-        setSelectedMatricula(null);
-        carregarDados();
+        try {
+            await avaliarMatriculaCoord(selectedMatricula.id, true);
+            toast('Matrícula aprovada com sucesso!', 'success');
+            setSelectedMatricula(null);
+            carregarDados();
+        } catch (err) {
+            toast(err?.response?.data?.mensagem ?? 'Erro ao aprovar matrícula.', 'error');
+        }
     }
 
     async function handleRejeitar() {
-        if(confirm("Deseja realmente rejeitar e pedir reenvio?")) {
-            await avaliarMatriculaCoord(selectedMatricula.email, 'PREENCHENDO');
-            toast("Devolvido ao aluno.", "info");
-            setSelectedMatricula(null);
-            carregarDados();
+        if (confirm('Deseja realmente rejeitar e pedir reenvio?')) {
+            try {
+                await avaliarMatriculaCoord(selectedMatricula.id, false, 'Documentação devolvida para correção.');
+                toast('Devolvido ao aluno.', 'info');
+                setSelectedMatricula(null);
+                carregarDados();
+            } catch (err) {
+                toast(err?.response?.data?.mensagem ?? 'Erro ao rejeitar matrícula.', 'error');
+            }
         }
     }
 
@@ -110,10 +113,22 @@ export function AprovacaoMatriculas() {
                             <div style={{backgroundColor: '#f9f9f9', padding: 15, borderRadius: 8, marginBottom: 20}}>
                                 <h4>Documentos Anexados:</h4>
                                 <ul style={{paddingLeft: 20, marginTop: 10}}>
-                                    <li><a href="#" style={{color: 'blue'}}>Identidade.pdf</a></li>
-                                    <li><a href="#" style={{color: 'blue'}}>Historico.pdf</a></li>
-                                    <li><a href="#" style={{color: 'blue'}}>ComprovanteResidencia.pdf</a></li>
-                                    <li><a href="#" style={{color: 'blue'}}>Foto_3x4.jpg</a></li>
+                                    {selectedMatricula.documentos?.length > 0 ? (
+                                        selectedMatricula.documentos.map((doc, i) => (
+                                            <li key={i}>
+                                                <a href={`http://localhost:5051/${doc.caminho}`} target="_blank" rel="noreferrer" style={{color: 'blue'}}>
+                                                    {doc.nomeOriginal ?? doc.tipo}
+                                                </a>
+                                            </li>
+                                        ))
+                                    ) : (
+                                        <>
+                                            <li><span style={{color: '#999'}}>Identidade</span></li>
+                                            <li><span style={{color: '#999'}}>Histórico Escolar</span></li>
+                                            <li><span style={{color: '#999'}}>Comprovante de Residência</span></li>
+                                            <li><span style={{color: '#999'}}>Foto 3x4</span></li>
+                                        </>
+                                    )}
                                 </ul>
                             </div>
                         )}
@@ -122,7 +137,18 @@ export function AprovacaoMatriculas() {
                             <div style={{backgroundColor: '#f9f9f9', padding: 15, borderRadius: 8, marginBottom: 20, textAlign: 'center'}}>
                                 <h4>Comprovante PIX:</h4>
                                 <i className="fa-solid fa-file-invoice-dollar" style={{fontSize: '3rem', color: 'green', margin: '10px 0'}}></i>
-                                <p><a href="#" style={{color: 'blue'}}>Ver Comprovante.pdf</a></p>
+                                {selectedMatricula.documentos?.find(d => d.tipo === 'ComprovantePix') ? (
+                                    <p>
+                                        <a 
+                                            href={`http://localhost:5051/${selectedMatricula.documentos.find(d => d.tipo === 'ComprovantePix').caminho}`}
+                                            target="_blank" rel="noreferrer" style={{color: 'blue'}}
+                                        >
+                                            Ver Comprovante
+                                        </a>
+                                    </p>
+                                ) : (
+                                    <p><a href="#" style={{color: 'blue'}}>Ver Comprovante.pdf</a></p>
+                                )}
                             </div>
                         )}
 

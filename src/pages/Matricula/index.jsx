@@ -273,9 +273,9 @@ export function Matricula() {
                     <form onSubmit={handlePasso3} className={styles.formGrid}>
                         <Select label="Série Desejada" name="serie" required value={matriculaData.serie} onChange={handleChange}>
                             <option value="">Selecione...</option>
-                            <option value="1º Ano EM">1º Ano Ensino Médio</option>
-                            <option value="2º Ano EM">2º Ano Ensino Médio</option>
-                            <option value="3º Ano EM">3º Ano Ensino Médio</option>
+                            <option value="1º Ano do Ensino Médio">1º Ano do Ensino Médio</option>
+                            <option value="2º Ano do Ensino Médio">2º Ano do Ensino Médio</option>
+                            <option value="3º Ano do Ensino Médio">3º Ano do Ensino Médio</option>
                         </Select>
                         <Select label="Turno" name="turno" required value={matriculaData.turno} onChange={handleChange}>
                             <option value="">Selecione...</option>
@@ -297,7 +297,7 @@ export function Matricula() {
                         </div>
                     </form>
                 )}
-
+                
                 {step === 4 && (
                     <form onSubmit={handlePasso4}>
                         <div className={styles.termsBox}>
@@ -367,7 +367,7 @@ export function Matricula() {
                         <Button style={{ marginTop: 20 }} onClick={() => navigate('/login')}>Voltar ao Login</Button>
                     </div>
                 )}
-                
+
                 {step === 6 && (
                     <div className={styles.statusMessage}>
                         <i className="fa-solid fa-party-horn" style={{ color: '#27ae60' }}></i>
