@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
+import { solicitarRecuperacaoSenha } from '../../services/api';
 import logo from '../../assets/images/Logo Edu Connect.png';
 import styles from './EsqueciSenha.module.css';
 
@@ -30,10 +31,10 @@ export function EsqueciSenha() {
 
         setLoading(true);
         try {
-            await mockSendRecoveryEmail(email);
+            await solicitarRecuperacaoSenha(email);
             navigate('/esqueci-minha-senha/codigo-otp', { state: { email } });
         } catch {
-            setError('Não foi possível enviar o código. Tente novamente.');
+            setError('Não foi possível solicitar a recuperação. Verifique sua conexão e tente novamente.');
         } finally {
             setLoading(false);
         }

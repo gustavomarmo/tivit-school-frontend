@@ -562,6 +562,30 @@ function mapStatusToFront(status) {
     return map[status] ?? status;
 }
 
+// ============================
+// RECUPERAÇÃO DE SENHA
+// ============================
+export async function solicitarRecuperacaoSenha(email) {
+    const response = await api.post('/auth/esqueci-senha', { email }, {
+        baseURL: 'http://localhost:5051'
+    });
+    return response.data;
+}
+
+export async function validarOtpSenha(email, codigo) {
+    const response = await api.post('/auth/validar-otp', { email, codigo }, {
+        baseURL: 'http://localhost:5051'
+    });
+    return response.data;
+}
+
+export async function resetarSenha(email, codigo, novaSenha) {
+    const response = await api.post('/auth/resetar-senha', { email, codigo, novaSenha }, {
+        baseURL: 'http://localhost:5051'
+    });
+    return response.data;
+}
+
 export async function getAbsenceData() {
     await simulateNetworkDelay(300);
     return Promise.resolve(_mockAbsenceData);

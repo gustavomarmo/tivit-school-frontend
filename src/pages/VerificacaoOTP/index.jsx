@@ -1,47 +1,37 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
+import { solicitarRecuperacaoSenha, validarOtpSenha, resetarSenha } from '../../services/api';
 import logo from '../../assets/images/Logo Edu Connect.png';
 import styles from './VerificacaoOTP.module.css';
 
 const OTP_LENGTH = 6;
-const MOCK_CODE = '123456';
 const RESEND_COOLDOWN = 30;
-
-async function mockResend(email) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            console.log(`[MOCK] Código reenviado para: ${email}`);
-            resolve(true);
-        }, 1000);
-    });
-}
-
-async function mockValidateOTP(code) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (code === MOCK_CODE) resolve(true);
-            else reject('Código incorreto.');
-        }, 1200);
-    });
-}
 
 export function VerificacaoOTP() {
     const navigate = useNavigate();
     const location = useLocation();
-    const email = location.state?.email || 'seu e-mail';
-
-    const [digits, setDigits] = useState(Array(OTP_LENGTH).fill(''));
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [resending, setResending] = useState(false);
-    const [cooldown, setCooldown] = useState(0);
-
-    const inputRefs = useRef([]);
+    const email = location.state?.email || '';
 
     useEffect(() => {
-        inputRefs.current[0]?.focus();
-    }, []);
+        if (!email) navigate('/esqueci-minha-senha');
+    }, [email, navigate]);
+
+    const [passo, setPasso] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const [digits, setDigits] = useState(Array(OTP_LENGTH).fill(''));
+    const [resending, setResending] = useState(false);
+    const [cooldown, setCooldown] = useState(0);
+    const inputRefs = useRef([]);
+
+    const [novaSenha, setNovaSenha] = useState('');
+    const [confirmarSenha, setConfirmarSenha] = useState('');
+
+    useEffect(() => {
+        if (passo === 1) inputRefs.current[0]?.focus();
+    }, [passo]);
 
     useEffect(() => {
         if (cooldown <= 0) return;
@@ -91,23 +81,46 @@ export function VerificacaoOTP() {
 
     async function handleSubmit(e) {
         e.preventDefault();
-        const code = digits.join('');
-        if (code.length < OTP_LENGTH) {
-            setError('Preencha todos os dígitos do código.');
-            return;
-        }
-
-        setLoading(true);
         setError('');
-        try {
-            await mockValidateOTP(code);
-            navigate('/login', { state: { recovered: true } });
-        } catch (msg) {
-            setError(msg);
-            setDigits(Array(OTP_LENGTH).fill(''));
-            setTimeout(() => inputRefs.current[0]?.focus(), 50);
-        } finally {
-            setLoading(false);
+        
+        const code = digits.join('');
+
+        if (passo === 1) {
+            if (code.length < OTP_LENGTH) {
+                setError('Preencha todos os dígitos do código.');
+                return;
+            }
+
+            setLoading(true);
+            try {
+                await validarOtpSenha(email, code);
+                setPasso(2);
+            } catch (err) {
+                setError(err.response?.data?.message || 'Código inválido ou expirado.');
+                setDigits(Array(OTP_LENGTH).fill(''));
+                setTimeout(() => inputRefs.current[0]?.focus(), 50);
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            if (novaSenha.length < 6) {
+                setError('A senha deve ter no mínimo 6 caracteres.');
+                return;
+            }
+            if (novaSenha !== confirmarSenha) {
+                setError('As senhas não coincidem.');
+                return;
+            }
+
+            setLoading(true);
+            try {
+                await resetarSenha(email, code, novaSenha);
+                navigate('/login', { state: { recovered: true } });
+            } catch (err) {
+                setError(err.response?.data?.message || 'Não foi possível redefinir a senha. Tente novamente.');
+            } finally {
+                setLoading(false);
+            }
         }
     }
 
@@ -115,11 +128,13 @@ export function VerificacaoOTP() {
         if (cooldown > 0 || resending) return;
         setResending(true);
         try {
-            await mockResend(email);
+            await solicitarRecuperacaoSenha(email);
             setCooldown(RESEND_COOLDOWN);
             setError('');
             setDigits(Array(OTP_LENGTH).fill(''));
             setTimeout(() => inputRefs.current[0]?.focus(), 50);
+        } catch {
+            setError('Erro ao reenviar o código. Verifique sua conexão.');
         } finally {
             setResending(false);
         }
@@ -139,73 +154,105 @@ export function VerificacaoOTP() {
                 </div>
 
                 <div className={styles.iconWrapper}>
-                    <i className="fa-solid fa-shield-halved"></i>
+                    <i className={passo === 1 ? "fa-solid fa-shield-halved" : "fa-solid fa-key"}></i>
                 </div>
 
-                <h2>Verificação</h2>
-                <p className={styles.description}>
-                    Enviamos um código de <strong>{OTP_LENGTH} dígitos</strong> para
-                </p>
-                <p className={styles.emailHighlight}>
-                    <i className="fa-solid fa-envelope"></i> {email}
-                </p>
+                <h2>{passo === 1 ? "Verificação" : "Nova Senha"}</h2>
+                
+                {passo === 1 ? (
+                    <>
+                        <p className={styles.description}>
+                            Enviamos um código de <strong>{OTP_LENGTH} dígitos</strong> para
+                        </p>
+                        <p className={styles.emailHighlight}>
+                            <i className="fa-solid fa-envelope"></i> {email}
+                        </p>
+                    </>
+                ) : (
+                    <p className={styles.description}>
+                        Digite sua nova senha de acesso.
+                    </p>
+                )}
 
                 {error && <div className={styles.errorMessage}>{error}</div>}
 
                 <form onSubmit={handleSubmit}>
-                    <div className={styles.otpGroup} onPaste={handlePaste}>
-                        {digits.map((digit, i) => (
+                    {passo === 1 ? (
+                        <div className={styles.otpGroup} onPaste={handlePaste}>
+                            {digits.map((digit, i) => (
+                                <input
+                                    key={i}
+                                    ref={el => inputRefs.current[i] = el}
+                                    type="text"
+                                    inputMode="numeric"
+                                    maxLength={1}
+                                    value={digit}
+                                    className={`${styles.otpInput} ${digit ? styles.filled : ''}`}
+                                    onChange={e => handleChange(i, e.target.value)}
+                                    onKeyDown={e => handleKeyDown(i, e)}
+                                    autoComplete="off"
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
                             <input
-                                key={i}
-                                ref={el => inputRefs.current[i] = el}
-                                type="text"
-                                inputMode="numeric"
-                                maxLength={1}
-                                value={digit}
-                                className={`${styles.otpInput} ${digit ? styles.filled : ''}`}
-                                onChange={e => handleChange(i, e.target.value)}
-                                onKeyDown={e => handleKeyDown(i, e)}
-                                autoComplete="off"
+                                type="password"
+                                placeholder="Nova Senha"
+                                value={novaSenha}
+                                onChange={(e) => setNovaSenha(e.target.value)}
+                                required
+                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #ccc', width: '100%' }}
                             />
-                        ))}
-                    </div>
+                            <input
+                                type="password"
+                                placeholder="Confirmar Nova Senha"
+                                value={confirmarSenha}
+                                onChange={(e) => setConfirmarSenha(e.target.value)}
+                                required
+                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #ccc', width: '100%' }}
+                            />
+                        </div>
+                    )}
 
                     <button
                         type="submit"
                         className={styles.btnSubmit}
-                        disabled={loading || !isFilled}
+                        disabled={loading || (passo === 1 && !isFilled)}
                     >
                         {loading ? (
                             <>
                                 <i className="fa-solid fa-circle-notch fa-spin"></i>
-                                Verificando...
+                                {passo === 1 ? "Verificando..." : "Salvando..."}
                             </>
                         ) : (
                             <>
                                 <i className="fa-solid fa-check"></i>
-                                Confirmar Código
+                                {passo === 1 ? "Confirmar Código" : "Redefinir Senha"}
                             </>
                         )}
                     </button>
                 </form>
 
-                <div className={styles.resendRow}>
-                    <span>Não recebeu?</span>
-                    <button
-                        className={styles.resendBtn}
-                        onClick={handleResend}
-                        disabled={cooldown > 0 || resending}
-                    >
-                        {resending
-                            ? 'Reenviando...'
-                            : cooldown > 0
-                                ? `Reenviar em ${cooldown}s`
-                                : 'Reenviar código'}
-                    </button>
-                </div>
+                {passo === 1 && (
+                    <div className={styles.resendRow}>
+                        <span>Não recebeu?</span>
+                        <button
+                            className={styles.resendBtn}
+                            onClick={handleResend}
+                            disabled={cooldown > 0 || resending}
+                        >
+                            {resending
+                                ? 'Reenviando...'
+                                : cooldown > 0
+                                    ? `Reenviar em ${cooldown}s`
+                                    : 'Reenviar código'}
+                        </button>
+                    </div>
+                )}
 
                 <button className={styles.backLink} onClick={() => navigate('/esqueci-minha-senha')}>
-                    <i className="fa-solid fa-arrow-left"></i> Alterar e-mail
+                    <i className="fa-solid fa-arrow-left"></i> {passo === 1 ? "Alterar e-mail" : "Voltar"}
                 </button>
             </div>
         </div>
