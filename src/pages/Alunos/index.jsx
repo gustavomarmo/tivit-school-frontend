@@ -23,7 +23,7 @@ export function Alunos() {
     });
 
     const [editingAluno, setEditingAluno] = useState(null);
-    const [editData, setEditData] = useState({ nome: '', turma: '', status: 'Ativo' });
+    const [editData, setEditData] = useState({ matricula: '', nome: '', turma: '', email: '', status: 'Ativo' });
     const [savingEdit, setSavingEdit] = useState(false);
 
     useEffect(() => {
@@ -43,7 +43,7 @@ export function Alunos() {
         try {
             await addStudent(novoAluno);
             toast('Aluno cadastrado com sucesso!', 'success');
-            setNovoAluno({ matricula: '', nome: '', turma: '', status: 'Ativo' });
+            setNovoAluno({ matricula: '', nome: '', email: '', turma: '', status: 'Ativo' });
             carregarAlunos();
         } catch (error) {
             console.error(error);
@@ -61,7 +61,7 @@ export function Alunos() {
 
     function openEdit(aluno) {
         setEditingAluno(aluno);
-        setEditData({ nome: aluno.nome, turmaId: aluno.turmaId || '', status: aluno.status });
+        setEditData({ matricula: aluno.matricula, nome: aluno.nome || '', email: aluno.email || '', turmaId: aluno.turmaId || '', status: aluno.status || 'Ativo'});
     }
 
     async function handleSaveEdit(e) {
@@ -146,6 +146,13 @@ export function Alunos() {
                             value={editData.nome}
                             onChange={e => setEditData({ ...editData, nome: e.target.value })}
                         />
+                        <Input
+                            label="E-mail"
+                            type="email"
+                            required
+                            value={editData.email}
+                            onChange={e => setEditData({ ...editData, email: e.target.value })}
+                        />
                         <Select
                             label="Turma"
                             required
@@ -153,7 +160,7 @@ export function Alunos() {
                             onChange={e => setEditData({ ...editData, turmaId: e.target.value })}
                         >
                             <option value="">Selecione...</option>
-                            {turmas.map(t => <option key={t.nome} value={t.nome}>{t.nome}</option>)}
+                            {turmas.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
                         </Select>
                         <Select
                             label="Status"

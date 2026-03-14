@@ -71,7 +71,9 @@ export async function addStudent(studentData) {
 
 export async function editStudent(id, newData) {
     const payload = {
+        matricula: newData.matricula,
         nome: newData.nome,
+        email: newData.email,
         turmaId: newData.turmaId,
         ativo: newData.status !== 'Inativo',
     };
@@ -121,7 +123,9 @@ export async function addTeacher(teacherData) {
 
 export async function editTeacher(id, newData) {
     const payload = {
+        matricula: newData.matricula,
         nome: newData.nome,
+        email: newData.email,
         especialidade: newData.disciplina,
         ativo: newData.status !== 'Inativo',
     };

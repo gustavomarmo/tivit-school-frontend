@@ -22,7 +22,7 @@ export function Professores() {
     });
 
     const [editingProf, setEditingProf] = useState(null);
-    const [editData, setEditData] = useState({ nome: '', disciplina: '', status: 'Ativo' });
+    const [editData, setEditData] = useState({ matricula: '', nome: '', email: '', disciplina: '', status: 'Ativo' });
     const [savingEdit, setSavingEdit] = useState(false);
 
     useEffect(() => {
@@ -45,7 +45,7 @@ export function Professores() {
         try {
             await addTeacher(novoProf);
             toast('Professor cadastrado com sucesso!', 'success');
-            setNovoProf({ matricula: '', nome: '', disciplina: '', status: 'Ativo' });
+            setNovoProf({ matricula: '', nome: '', email: '', disciplina: '', status: 'Ativo' });
             carregarProfessores();
         } catch (error) {
             console.error(error);
@@ -63,7 +63,7 @@ export function Professores() {
 
     function openEdit(prof) {
         setEditingProf(prof);
-        setEditData({ nome: prof.nome, disciplina: prof.disciplina, status: prof.status });
+        setEditData({ matricula: prof.matricula, nome: prof.nome || '', email: prof.email || '', disciplina: prof.disciplina || '', status: prof.status || 'Ativo' });
     }
 
     async function handleSaveEdit(e) {
@@ -152,6 +152,13 @@ export function Professores() {
                             autoFocus
                             value={editData.nome}
                             onChange={e => setEditData({ ...editData, nome: e.target.value })}
+                        />
+                        <Input
+                            label="E-mail"
+                            type="email"
+                            required
+                            value={editData.email}
+                            onChange={e => setEditData({ ...editData, email: e.target.value })}
                         />
                         <Input
                             label="Disciplina"
