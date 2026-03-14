@@ -70,13 +70,13 @@ export function Boletim() {
     async function carregar() {
             const data = await getBoletim();
             setNotas(data.map(item => ({
-                materia: item.Materia,
-                n1_n1: item.n1_n1 ?? 0,
-                n1_n2: item.n1_n2 ?? 0,
-                n1_ativ: item.n1_ativ ?? 0,
-                n2_n1: item.n2_n1 ?? 0,
-                n2_n2: item.n2_n2 ?? 0,
-                n2_ativ: item.n2_ativ ?? 0,
+                materia: item.Materia ?? item.materia,
+                n1_n1: item.N1_N1 ?? item.n1_N1 ?? item.n1_n1 ?? 0,
+                n1_n2: item.N1_N2 ?? item.n1_N2 ?? item.n1_n2 ?? 0,
+                n1_ativ: item.N1_Ativ ?? item.n1_Ativ ?? item.n1_ativ ?? 0,
+                n2_n1: item.N2_N1 ?? item.n2_N1 ?? item.n2_n1 ?? 0,
+                n2_n2: item.N2_N2 ?? item.n2_N2 ?? item.n2_n2 ?? 0,
+                n2_ativ: item.N2_Ativ ?? item.n2_Ativ ?? item.n2_ativ ?? 0,
             })));
             setLoading(false);
         }
