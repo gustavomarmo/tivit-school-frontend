@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getClasses, getSubjectsList, getStudents, realizarChamada } from '../../services/api';
+import { getSubjectsList, getStudents, realizarChamada } from '../../services/api';
 import { useDialog } from '../../contexts/DialogContext';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -10,28 +10,51 @@ import styles from './Frequencia.module.css';
 export function Frequencia() {
     const { toast } = useDialog();
 
-    const [turmas, setTurmas] = useState([]);
-    const [materias, setMaterias] = useState([]);
-    
-    const [filtro, setFiltro] = useState({ turma: '', materia: '', horario: '' });
+    const [vinculos, setVinculos] = useState([]);
+    const [disciplinasUnicas, setDisciplinasUnicas] = useState([]);
+    const [turmasFiltradas, setTurmasFiltradas] = useState([]);
+
+    const [filtro, setFiltro] = useState({ disciplinaId: '', turmaId: '', horario: '' });
     const [alunos, setAlunos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [listVisible, setListVisible] = useState(false);
 
     useEffect(() => {
-        getClasses().then(setTurmas);
-        getSubjectsList().then(setMaterias);
+        getSubjectsList().then(data => {
+            setVinculos(data);
+            const mapa = new Map();
+            data.forEach(v => {
+                if (!mapa.has(v.disciplinaId)) {
+                    mapa.set(v.disciplinaId, { disciplinaId: v.disciplinaId, nome: v.nome });
+                }
+            });
+            setDisciplinasUnicas(Array.from(mapa.values()));
+        });
     }, []);
 
+    function handleDisciplinaChange(e) {
+        const disciplinaId = e.target.value;
+        const turmas = vinculos
+            .filter(v => String(v.disciplinaId) === disciplinaId)
+            .map(v => ({ turmaId: v.turmaId, nome: v.turma }));
+        setTurmasFiltradas(turmas);
+        setFiltro(prev => ({ ...prev, disciplinaId, turmaId: '' }));
+        setListVisible(false);
+    }
+
+    function handleTurmaChange(e) {
+        setFiltro(prev => ({ ...prev, turmaId: e.target.value }));
+        setListVisible(false);
+    }
+
     async function handleBuscar() {
-        if (!filtro.turma || !filtro.materia || !filtro.horario) {
-            toast('Selecione Turma, Matéria e Horário para continuar.', 'warning');
+        if (!filtro.disciplinaId || !filtro.turmaId || !filtro.horario) {
+            toast('Selecione Matéria, Turma e Horário para continuar.', 'warning');
             return;
         }
         setLoading(true);
-
         const todos = await getStudents();
-        const daTurma = todos.filter(a => String(a.turmaId) === String(filtro.turma) || a.turma === filtro.turma);
+        const daTurma = todos.filter(a => String(a.turmaId) === String(filtro.turmaId));
         setAlunos(daTurma.map(a => ({ ...a, presente: true })));
         setListVisible(true);
         setLoading(false);
@@ -50,14 +73,18 @@ export function Frequencia() {
         }));
 
         await realizarChamada(
-            Number(filtro.materia),
-            new Date().toISOString(),  
+            Number(filtro.disciplinaId),
+            new Date().toISOString(),
             registros
         );
         toast('Frequência registrada com sucesso!', 'success');
         setListVisible(false);
-        setFiltro({ turma: '', materia: '', horario: '' });
+        setFiltro({ disciplinaId: '', turmaId: '', horario: '' });
+        setTurmasFiltradas([]);
     }
+
+    const nomeDisciplina = disciplinasUnicas.find(d => String(d.disciplinaId) === filtro.disciplinaId)?.nome ?? '';
+    const nomeTurma      = turmasFiltradas.find(t => String(t.turmaId) === filtro.turmaId)?.nome ?? '';
 
     return (
         <div className={styles.container}>
@@ -65,28 +92,33 @@ export function Frequencia() {
 
             <Card title="Dados da Aula">
                 <div className={styles.filterGrid}>
-                    <Select 
+                    <Select
                         label="Matéria"
-                        value={filtro.materia}
-                        onChange={e => setFiltro({...filtro, materia: e.target.value})}
+                        value={filtro.disciplinaId}
+                        onChange={handleDisciplinaChange}
                     >
                         <option value="">Selecione...</option>
-                        {materias.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                        {disciplinasUnicas.map(d => (
+                            <option key={d.disciplinaId} value={d.disciplinaId}>{d.nome}</option>
+                        ))}
                     </Select>
 
-                    <Select 
+                    <Select
                         label="Turma"
-                        value={filtro.turma}
-                        onChange={e => setFiltro({...filtro, turma: e.target.value})}
+                        value={filtro.turmaId}
+                        onChange={handleTurmaChange}
+                        disabled={!filtro.disciplinaId}
                     >
                         <option value="">Selecione...</option>
-                        {turmas.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
+                        {turmasFiltradas.map(t => (
+                            <option key={t.turmaId} value={t.turmaId}>{t.nome}</option>
+                        ))}
                     </Select>
 
-                    <Select 
+                    <Select
                         label="Horário"
                         value={filtro.horario}
-                        onChange={e => setFiltro({...filtro, horario: e.target.value})}
+                        onChange={e => setFiltro(prev => ({ ...prev, horario: e.target.value }))}
                     >
                         <option value="">Selecione...</option>
                         <option value="07:30">07:30 - 08:20 (1º Aula)</option>
@@ -104,14 +136,16 @@ export function Frequencia() {
             {listVisible && (
                 <div className="animate-fade-in">
                     <Card>
-                        <div style={{display:'flex', justifyContent:'space-between', marginBottom: 15}}>
-                            <h3>Lista de Chamada: {filtro.turma}</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 15 }}>
+                            <h3>{nomeDisciplina} — {nomeTurma}</h3>
                             <span>Total: <strong>{alunos.length}</strong> alunos</span>
                         </div>
 
                         <Table headers={['Matrícula', 'Nome', 'Presença', 'Situação']}>
                             {loading ? (
                                 <tr><td colSpan="4" align="center">Carregando...</td></tr>
+                            ) : alunos.length === 0 ? (
+                                <tr><td colSpan="4" align="center">Nenhum aluno encontrado para esta turma.</td></tr>
                             ) : (
                                 alunos.map(aluno => (
                                     <tr key={aluno.matricula} style={{ backgroundColor: aluno.presente ? 'transparent' : 'rgba(192, 57, 43, 0.05)' }}>
@@ -119,8 +153,8 @@ export function Frequencia() {
                                         <td>{aluno.nome}</td>
                                         <td align="center">
                                             <div className={styles.checkboxContainer}>
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     className={styles.checkbox}
                                                     checked={aluno.presente}
                                                     onChange={() => togglePresenca(aluno.matricula)}
@@ -141,7 +175,7 @@ export function Frequencia() {
                             <div style={{ marginRight: 'auto', fontSize: '0.9rem', color: '#666' }}>
                                 Resumo: {alunos.filter(a => a.presente).length} Presentes / {alunos.filter(a => !a.presente).length} Ausentes
                             </div>
-                            <Button onClick={handleSubmit}>
+                            <Button onClick={handleSubmit} disabled={alunos.length === 0}>
                                 <i className="fa-solid fa-paper-plane"></i> Enviar Frequência
                             </Button>
                         </div>

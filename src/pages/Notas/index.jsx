@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getClasses, getSubjectsList, getNotasParaLancamento, salvarNotasLote } from '../../services/api';
+import { getSubjectsList, getNotasParaLancamento, salvarNotasLote } from '../../services/api';
 import { useDialog } from '../../contexts/DialogContext';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -11,26 +11,51 @@ import styles from './Notas.module.css';
 export function Notas() {
     const { toast } = useDialog();
 
-    const [filtro, setFiltro] = useState({ turma: '', materia: '' });
-    const [turmas, setTurmas] = useState([]);
-    const [materias, setMaterias] = useState([]);
+    const [vinculos, setVinculos] = useState([]);
+    const [disciplinasUnicas, setDisciplinasUnicas] = useState([]);
+    const [turmasFiltradas, setTurmasFiltradas] = useState([]);
+
+    const [filtro, setFiltro] = useState({ disciplinaId: '', turmaId: '' });
     const [alunos, setAlunos] = useState([]);
     const [buscaNome, setBuscaNome] = useState('');
     const [loading, setLoading] = useState(false);
     const [listVisible, setListVisible] = useState(false);
 
     useEffect(() => {
-        getClasses().then(setTurmas);
-        getSubjectsList().then(setMaterias);
+        getSubjectsList().then(data => {
+            setVinculos(data);
+            const mapa = new Map();
+            data.forEach(v => {
+                if (!mapa.has(v.disciplinaId)) {
+                    mapa.set(v.disciplinaId, { disciplinaId: v.disciplinaId, nome: v.nome });
+                }
+            });
+            setDisciplinasUnicas(Array.from(mapa.values()));
+        });
     }, []);
 
+    function handleDisciplinaChange(e) {
+        const disciplinaId = e.target.value;
+        const turmas = vinculos
+            .filter(v => String(v.disciplinaId) === disciplinaId)
+            .map(v => ({ turmaId: v.turmaId, nome: v.turma }));
+        setTurmasFiltradas(turmas);
+        setFiltro({ disciplinaId, turmaId: '' });
+        setListVisible(false);
+    }
+
+    function handleTurmaChange(e) {
+        setFiltro(prev => ({ ...prev, turmaId: e.target.value }));
+        setListVisible(false);
+    }
+
     async function handleBuscar() {
-        if (!filtro.turma || !filtro.materia) {
-            toast('Selecione Turma e Matéria para continuar.', 'warning');
+        if (!filtro.disciplinaId || !filtro.turmaId) {
+            toast('Selecione Disciplina e Turma para continuar.', 'warning');
             return;
         }
         setLoading(true);
-        const dados = await getNotasParaLancamento(filtro.turma, filtro.materia);
+        const dados = await getNotasParaLancamento(filtro.turmaId, filtro.disciplinaId);
         setAlunos(dados.map(a => ({
             ...a,
             nome: a.nome ?? '',
@@ -59,27 +84,31 @@ export function Notas() {
     }
 
     async function handleSave() {
-        const turmaId = Number(filtro.turma);
-        const disciplinaId = Number(filtro.materia);
+        const turmaId      = Number(filtro.turmaId);
+        const disciplinaId = Number(filtro.disciplinaId);
 
         const payload = alunos.flatMap(a => [
-            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 1, Tipo: 'N1', Valor: Number(a.n1_b1) || 0 },
-            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 1, Tipo: 'N2', Valor: Number(a.n2_b1) || 0 },
+            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 1, Tipo: 'N1',   Valor: Number(a.n1_b1) || 0 },
+            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 1, Tipo: 'N2',   Valor: Number(a.n2_b1) || 0 },
             { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 1, Tipo: 'Ativ', Valor: Number(a.af_b1) || 0 },
-            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 2, Tipo: 'N1', Valor: Number(a.n1_b2) || 0 },
-            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 2, Tipo: 'N2', Valor: Number(a.n2_b2) || 0 },
+            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 2, Tipo: 'N1',   Valor: Number(a.n1_b2) || 0 },
+            { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 2, Tipo: 'N2',   Valor: Number(a.n2_b2) || 0 },
             { AlunoId: a.alunoId, TurmaId: turmaId, DisciplinaId: disciplinaId, Bimestre: 2, Tipo: 'Ativ', Valor: Number(a.af_b2) || 0 },
         ]);
 
         await salvarNotasLote(payload);
         toast('Notas lançadas com sucesso!', 'success');
         setListVisible(false);
-        setFiltro({ turma: '', materia: '' });
+        setFiltro({ disciplinaId: '', turmaId: '' });
+        setTurmasFiltradas([]);
     }
 
-    const alunosFiltrados = alunos.filter(a => 
-    (a.nome ?? '').toLowerCase().includes(buscaNome.toLowerCase())
+    const alunosFiltrados = alunos.filter(a =>
+        (a.nome ?? '').toLowerCase().includes(buscaNome.toLowerCase())
     );
+
+    const nomeDisciplina = disciplinasUnicas.find(d => String(d.disciplinaId) === filtro.disciplinaId)?.nome ?? '';
+    const nomeTurma      = turmasFiltradas.find(t => String(t.turmaId) === filtro.turmaId)?.nome ?? '';
 
     return (
         <div className={styles.container}>
@@ -87,22 +116,27 @@ export function Notas() {
 
             <Card title="Selecione a Turma">
                 <div className={styles.filterGrid}>
-                    <Select 
+                    <Select
                         label="Matéria"
-                        value={filtro.materia}
-                        onChange={e => setFiltro({...filtro, materia: e.target.value})}
+                        value={filtro.disciplinaId}
+                        onChange={handleDisciplinaChange}
                     >
                         <option value="">Selecione...</option>
-                        {materias.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                        {disciplinasUnicas.map(d => (
+                            <option key={d.disciplinaId} value={d.disciplinaId}>{d.nome}</option>
+                        ))}
                     </Select>
 
-                    <Select 
+                    <Select
                         label="Turma"
-                        value={filtro.turma}
-                        onChange={e => setFiltro({...filtro, turma: e.target.value})}
+                        value={filtro.turmaId}
+                        onChange={handleTurmaChange}
+                        disabled={!filtro.disciplinaId}
                     >
                         <option value="">Selecione...</option>
-                        {turmas.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)} //
+                        {turmasFiltradas.map(t => (
+                            <option key={t.turmaId} value={t.turmaId}>{t.nome}</option>
+                        ))}
                     </Select>
 
                     <Button onClick={handleBuscar}>
@@ -114,9 +148,9 @@ export function Notas() {
             {listVisible && (
                 <Card>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                        <h3>{filtro.materia} - {filtro.turma}</h3>
+                        <h3>{nomeDisciplina} — {nomeTurma}</h3>
                         <div style={{ width: '300px' }}>
-                            <Input 
+                            <Input
                                 placeholder="Filtrar aluno por nome..."
                                 value={buscaNome}
                                 onChange={e => setBuscaNome(e.target.value)}
