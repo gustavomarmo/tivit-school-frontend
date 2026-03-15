@@ -16,6 +16,7 @@ export function Sidebar({ isOpen }) {
         { path: '/alunos', icon: 'fa-solid fa-person', text: 'Alunos', roles: ['coordenador'] },
         { path: '/professores', icon: 'fa-solid fa-person-chalkboard', text: 'Professores', roles: ['coordenador'] },
         { path: '/aprovacao-matriculas', icon: 'fa-solid fa-file-signature', text: 'Matrículas', roles: ['coordenador'] },
+        { path: '/turmas', icon: 'fa-solid fa-chalkboard', text: 'Turmas', roles: ['coordenador'] },
     ];
 
     const linksToRender = allNavLinks.filter(link => link.roles.includes(userRole));

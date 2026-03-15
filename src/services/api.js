@@ -139,6 +139,46 @@ export async function deleteTeacher(id) {
 }
 
 // ============================
+// CRUD TURMAS
+// ============================
+export async function createTurma(turmaData) {
+    const response = await api.post('/turmas', {
+        Nome: turmaData.nome,
+        AnoLetivo: turmaData.anoLetivo,
+    });
+    return response.data;
+}
+ 
+export async function deleteTurma(id) {
+    await api.delete(`/turmas/${id}`);
+    return true;
+}
+ 
+export async function getVinculosDaTurma(turmaId) {
+    const response = await api.get(`/turmas/${turmaId}/vinculos`);
+    return response.data;
+}
+ 
+export async function vincularDisciplina(payload) {
+    const response = await api.post('/disciplinas/vincular', {
+        turmaId: payload.turmaId,
+        disciplinaId: payload.disciplinaId,
+        professorId: payload.professorId,
+    });
+    return response.data;
+}
+ 
+export async function desvincularDisciplina(vinculoId) {
+    await api.delete(`/turmas/vinculos/${vinculoId}`);
+    return true;
+}
+ 
+export async function getAllDisciplinas() {
+    const response = await api.get('/disciplinas');
+    return response.data;
+}
+
+// ============================
 // CRUD DISCIPLINAS
 // ============================
 export async function getSubjectsList() {
@@ -381,7 +421,7 @@ export async function getCoordinatorData() {
 }
 
 // ============================
-// MATRÍCULA — INTEGRAÇÃO REAL
+// MATRÍCULA
 // ============================
 export async function iniciarMatricula(dadosIniciais) {
     const response = await api.post('/matriculas/iniciar', {

@@ -6,6 +6,7 @@ import styles from './Dashboard.module.css';
 export function DashboardProfessor() {
     const [dados, setDados] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         async function carregar() {
@@ -23,6 +24,15 @@ export function DashboardProfessor() {
 
     if (loading) {
         return <div style={{ padding: 20 }}>Carregando painel do professor...</div>;
+    }
+
+    if (error || !dados) {
+        return (
+            <div style={{ padding: 20, color: '#c0392b' }}>
+                <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 8 }}></i>
+                Erro ao carregar o painel. Tente recarregar a página.
+            </div>
+        );
     }
 
     return (

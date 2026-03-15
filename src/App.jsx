@@ -17,6 +17,7 @@ import { EsqueciSenha } from './pages/EsqueciSenha';
 import { VerificacaoOTP } from './pages/VerificacaoOTP';
 import { Matricula } from './pages/Matricula';
 import { AprovacaoMatriculas } from './pages/AprovacaoMatriculas';
+import { Turmas } from './pages/Turmas';
 
 
 function PrivateRoute({ children }) {
@@ -56,6 +57,7 @@ function App() {
                 <Route path="frequencia" element={<Frequencia />} />
                 <Route path="notas" element={<Notas />} />
                 <Route path="aprovacao-matriculas" element={<AprovacaoMatriculas />} />
+                <Route path="turmas" element={<Turmas />} />
               </Route>
 
             </Routes>
