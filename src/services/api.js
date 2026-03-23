@@ -35,9 +35,7 @@ let _mockNotifications = [
 // LOGIN USUÁRIO
 // ============================
 export async function loginUser(email, senha) {
-    const response = await api.post('/auth/login', { email, senha }, {
-        baseURL: 'http://localhost:5051'
-    });
+    const response = await api.post('/auth/login', { email, senha });
     return response.data;
 }
 
@@ -45,7 +43,7 @@ export async function loginUser(email, senha) {
 // CRUD ALUNOS
 // ============================
 export async function getStudents() {
-    const response = await api.get('/alunos');
+    const response = await api.get('/api/alunos');
     return response.data.map(a => ({
         id: a.id,
         matricula: a.matricula,
@@ -65,7 +63,7 @@ export async function addStudent(studentData) {
         turmaId: studentData.turmaId,
         ativo: studentData.status !== 'Inativo',
     };
-    const response = await api.post('/alunos', payload);
+    const response = await api.post('/api/alunos', payload);
     return response.data;
 }
 
@@ -77,12 +75,12 @@ export async function editStudent(id, newData) {
         turmaId: newData.turmaId,
         ativo: newData.status !== 'Inativo',
     };
-    const response = await api.put(`/alunos/${id}`, payload);
+    const response = await api.put(`/api/alunos/${id}`, payload);
     return response.data;
 }
 
 export async function deleteStudent(id) {
-    await api.delete(`/alunos/${id}`);
+    await api.delete(`/api/alunos/${id}`);
     return true;
 }
 
@@ -90,7 +88,7 @@ export async function deleteStudent(id) {
 // CRUD TURMAS
 // ============================
 export async function getClasses() {
-    const response = await api.get('/turmas');
+    const response = await api.get('/api/turmas');
     return response.data;
 }
 
@@ -98,7 +96,7 @@ export async function getClasses() {
 // CRUD PROFESSORES
 // ============================
 export async function getTeachers() {
-    const response = await api.get('/professores');
+    const response = await api.get('/api/professores');
     return response.data.map(p => ({
         id: p.id,
         matricula: p.matricula,
@@ -117,7 +115,7 @@ export async function addTeacher(teacherData) {
         especialidade: teacherData.disciplina,
         ativo: teacherData.status !== 'Inativo',
     };
-    const response = await api.post('/professores', payload);
+    const response = await api.post('/api/professores', payload);
     return response.data;
 }
 
@@ -129,12 +127,12 @@ export async function editTeacher(id, newData) {
         especialidade: newData.disciplina,
         ativo: newData.status !== 'Inativo',
     };
-    const response = await api.put(`/professores/${id}`, payload);
+    const response = await api.put(`/api/professores/${id}`, payload);
     return response.data;
 }
 
 export async function deleteTeacher(id) {
-    await api.delete(`/professores/${id}`);
+    await api.delete(`/api/professores/${id}`);
     return true;
 }
 
@@ -142,39 +140,39 @@ export async function deleteTeacher(id) {
 // CRUD TURMAS
 // ============================
 export async function createTurma(turmaData) {
-    const response = await api.post('/turmas', {
+    const response = await api.post('/api/turmas', {
         Nome: turmaData.nome,
         AnoLetivo: turmaData.anoLetivo,
     });
     return response.data;
 }
- 
+
 export async function deleteTurma(id) {
-    await api.delete(`/turmas/${id}`);
+    await api.delete(`/api/turmas/${id}`);
     return true;
 }
- 
+
 export async function getVinculosDaTurma(turmaId) {
-    const response = await api.get(`/turmas/${turmaId}/vinculos`);
+    const response = await api.get(`/api/turmas/${turmaId}/vinculos`);
     return response.data;
 }
- 
+
 export async function vincularDisciplina(payload) {
-    const response = await api.post('/disciplinas/vincular', {
+    const response = await api.post('/api/disciplinas/vincular', {
         turmaId: payload.turmaId,
         disciplinaId: payload.disciplinaId,
         professorId: payload.professorId,
     });
     return response.data;
 }
- 
+
 export async function desvincularDisciplina(vinculoId) {
-    await api.delete(`/turmas/vinculos/${vinculoId}`);
+    await api.delete(`/api/turmas/vinculos/${vinculoId}`);
     return true;
 }
- 
+
 export async function getAllDisciplinas() {
-    const response = await api.get('/disciplinas');
+    const response = await api.get('/api/disciplinas');
     return response.data;
 }
 
@@ -182,12 +180,12 @@ export async function getAllDisciplinas() {
 // CRUD DISCIPLINAS
 // ============================
 export async function getSubjectsList() {
-    const response = await api.get('/disciplinas/listar');
+    const response = await api.get('/api/disciplinas/listar');
     return response.data;
 }
 
 export async function getSubjectContent(subject, role) {
-    const response = await api.get(`/disciplinas/${subject.id}/conteudo`);
+    const response = await api.get(`/api/disciplinas/${subject.id}/conteudo`);
     const data = response.data;
 
     return data.topicos.map(t => ({
@@ -212,7 +210,7 @@ export async function getSubjectContent(subject, role) {
 // CRUD TÓPICOS
 // ============================
 export async function addTopicToSubject(subject, topicTitle) {
-    const response = await api.post('/topicos', {
+    const response = await api.post('/api/topicos', {
         titulo: topicTitle,
         turmaDisciplinaId: subject.id,
     });
@@ -220,7 +218,7 @@ export async function addTopicToSubject(subject, topicTitle) {
 }
 
 export async function editTopicFromSubject(topicId, newTitle) {
-    await api.put(`/topicos/${topicId}`, {
+    await api.put(`/api/topicos/${topicId}`, {
         titulo: newTitle,
         turmaDisciplinaId: 0,
     });
@@ -228,7 +226,7 @@ export async function editTopicFromSubject(topicId, newTitle) {
 }
 
 export async function deleteTopicFromSubject(topicId) {
-    await api.delete(`/topicos/${topicId}`);
+    await api.delete(`/api/topicos/${topicId}`);
     return true;
 }
 
@@ -236,7 +234,7 @@ export async function deleteTopicFromSubject(topicId) {
 // CRUD MATERIAIS
 // ============================
 export async function addSubjectResource(moduleId, recurso) {
-    await api.post('/materiais', {
+    await api.post('/api/materiais', {
         titulo: recurso.title,
         tipo: recurso.type,
         url: recurso.url || '',
@@ -246,7 +244,7 @@ export async function addSubjectResource(moduleId, recurso) {
 }
 
 export async function editMaterialFromSubject(itemId, newData) {
-    await api.put(`/materiais/${itemId}`, {
+    await api.put(`/api/materiais/${itemId}`, {
         titulo: newData.nome,
         tipo: newData.type,
         url: newData.url || '',
@@ -256,7 +254,7 @@ export async function editMaterialFromSubject(itemId, newData) {
 }
 
 export async function deleteMaterialFromSubject(itemId) {
-    await api.delete(`/materiais/${itemId}`);
+    await api.delete(`/api/materiais/${itemId}`);
     return true;
 }
 
@@ -264,12 +262,12 @@ export async function deleteMaterialFromSubject(itemId) {
 // NOTAS E BOLETIM
 // ============================
 export async function getBoletim() {
-    const response = await api.get('/notas/boletim');
+    const response = await api.get('/api/notas/boletim');
     return response.data;
 }
 
 export async function downloadBoletimPdf() {
-    const response = await api.get('/notas/boletim/download', {
+    const response = await api.get('/api/notas/boletim/download', {
         responseType: 'blob',
     });
     const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -283,14 +281,14 @@ export async function downloadBoletimPdf() {
 }
 
 export async function getNotasParaLancamento(turmaId, disciplinaId) {
-    const response = await api.get('/notas/lancamento', {
+    const response = await api.get('/api/notas/lancamento', {
         params: { turmaId, disciplinaId }
     });
     return response.data;
 }
 
 export async function salvarNotasLote(notas) {
-    const response = await api.post('/notas/lote', notas);
+    const response = await api.post('/api/notas/lote', notas);
     return response.data;
 }
 
@@ -298,12 +296,12 @@ export async function salvarNotasLote(notas) {
 // FREQUÊNCIA
 // ============================
 export async function getFrequenciaResumo() {
-    const response = await api.get('/frequencias/resumo');
+    const response = await api.get('/api/frequencias/resumo');
     return response.data;
 }
 
 export async function realizarChamada(disciplinaId, data, registros) {
-    const response = await api.post('/frequencias/chamada', {
+    const response = await api.post('/api/frequencias/chamada', {
         disciplinaId,
         data,
         registros,
@@ -315,7 +313,7 @@ export async function realizarChamada(disciplinaId, data, registros) {
 // CALENDÁRIO / EVENTOS
 // ============================
 export async function getCalendarEvents(mes, ano) {
-    const response = await api.get('/eventos', { params: { mes, ano } });
+    const response = await api.get('/api/eventos', { params: { mes, ano } });
     const dict = {};
     for (const evt of response.data) {
         const dateKey = evt.start.substring(0, 10);
@@ -326,7 +324,7 @@ export async function getCalendarEvents(mes, ano) {
 }
 
 export async function saveCalendarEvent(date, title) {
-    const response = await api.post('/eventos', {
+    const response = await api.post('/api/eventos', {
         titulo: title,
         descricao: '',
         dataInicio: `${date}T00:00:00`,
@@ -338,7 +336,7 @@ export async function saveCalendarEvent(date, title) {
 }
 
 export async function updateCalendarEvent(date, eventId, newTitle) {
-    await api.put(`/eventos/${eventId}`, {
+    await api.put(`/api/eventos/${eventId}`, {
         titulo: newTitle,
         descricao: '',
         dataInicio: `${date}T00:00:00`,
@@ -350,7 +348,7 @@ export async function updateCalendarEvent(date, eventId, newTitle) {
 }
 
 export async function deleteCalendarEvent(eventId) {
-    await api.delete(`/eventos/${eventId}`);
+    await api.delete(`/api/eventos/${eventId}`);
     return true;
 }
 
@@ -358,22 +356,22 @@ export async function deleteCalendarEvent(eventId) {
 // NOTIFICAÇÕES
 // ============================
 export async function getNotifications() {
-    const response = await api.get('/notificacoes');
+    const response = await api.get('/api/notificacoes');
     return response.data;
 }
 
 export async function markNotificationAsRead(notificationId) {
-    await api.put(`/notificacoes/${notificationId}/ler`);
+    await api.put(`/api/notificacoes/${notificationId}/ler`);
     return true;
 }
 
 export async function markAllNotificationsAsRead() {
-    await api.put('/notificacoes/ler-todas');
+    await api.put('/api/notificacoes/ler-todas');
     return true;
 }
 
 export async function getUnreadCount() {
-    const response = await api.get('/notificacoes/nao-lidas/contagem');
+    const response = await api.get('/api/notificacoes/nao-lidas/contagem');
     return response.data;
 }
 
@@ -381,7 +379,7 @@ export async function getUnreadCount() {
 // DASHBOARD
 // ============================
 export async function getProfessorData() {
-    const response = await api.get('/dashboards/professor');
+    const response = await api.get('/api/dashboards/professor');
     const d = response.data;
     return {
         resumo: {
@@ -401,7 +399,7 @@ export async function getProfessorData() {
 }
 
 export async function getCoordinatorData() {
-    const response = await api.get('/dashboards/coordenador');
+    const response = await api.get('/api/dashboards/coordenador');
     const d = response.data;
     return {
         resumo: {
@@ -424,13 +422,13 @@ export async function getCoordinatorData() {
 // MATRÍCULA
 // ============================
 export async function iniciarMatricula(dadosIniciais) {
-    const response = await api.post('/matriculas/iniciar', {
+    const response = await api.post('/api/matriculas/iniciar', {
         NomeCompleto: dadosIniciais.nome,
         Cpf: dadosIniciais.cpf,
         Email: dadosIniciais.email,
         Telefone: dadosIniciais.telefone,
         DataNascimento: dadosIniciais.dataNascimento || new Date().toISOString(),
-    }, { baseURL: 'http://localhost:5051/api' });
+    });
 
     return {
         success: true,
@@ -440,10 +438,10 @@ export async function iniciarMatricula(dadosIniciais) {
 }
 
 export async function validarOtpMatricula(email, otpInserido) {
-    const response = await api.post('/matriculas/validar-otp', {
+    const response = await api.post('/api/matriculas/validar-otp', {
         Email: email,
         Codigo: otpInserido,
-    }, { baseURL: 'http://localhost:5051/api' });
+    });
 
     const d = response.data;
 
@@ -474,14 +472,14 @@ export async function validarOtpMatricula(email, otpInserido) {
 }
 
 export async function salvarDadosComplementares(idSolicitacao, dadosCompl) {
-    await api.put('/matriculas/dados-complementares', {
+    await api.put('/api/matriculas/dados-complementares', {
         SolicitacaoId: idSolicitacao,
         EnderecoCompleto: dadosCompl.endereco,
         Rg: dadosCompl.rg || '',
         NomeResponsavel: dadosCompl.nomeResponsavel,
         ContatoResponsavel: dadosCompl.contatoResponsavel,
         EscolaridadeAnterior: dadosCompl.escolaridade || '',
-    }, { baseURL: 'http://localhost:5051/api' });
+    });
     return true;
 }
 
@@ -491,17 +489,14 @@ export async function uploadDocumentoMatricula(idSolicitacao, tipo, arquivo) {
     formData.append('tipo', tipo);
     formData.append('arquivo', arquivo);
 
-    const response = await api.post('/matriculas/upload', formData, {
-        baseURL: 'http://localhost:5051/api',
+    const response = await api.post('/api/matriculas/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
 }
 
 export async function checarVaga(serie, turno) {
-    const response = await api.get('/matriculas/vagas-disponiveis', {
-        baseURL: 'http://localhost:5051/api',
-    });
+    const response = await api.get('/api/matriculas/vagas-disponiveis');
 
     const vagas = response.data;
 
@@ -541,20 +536,20 @@ export async function selecionarVaga(idSolicitacao, serie, turno) {
 
     console.log('[selecionarVaga] Enviando turno normalizado:', turnoNorm, '| serie:', serie);
 
-    const response = await api.put('/matriculas/selecionar-vaga', {
+    const response = await api.put('/api/matriculas/selecionar-vaga', {
         SolicitacaoId: idSolicitacao,
         Serie: serie,
         Turno: turnoNorm,
-    }, { baseURL: 'http://localhost:5051/api' });
+    });
 
     return response.data;
 }
 
 export async function aceitarTermosMatricula(idSolicitacao) {
-    await api.put('/matriculas/aceitar-termos', {
+    await api.put('/api/matriculas/aceitar-termos', {
         SolicitacaoId: idSolicitacao,
         TermosAceitos: true,
-    }, { baseURL: 'http://localhost:5051/api' });
+    });
     return true;
 }
 
@@ -563,15 +558,14 @@ export async function uploadComprovantePix(idSolicitacao, arquivo) {
     formData.append('solicitacaoId', idSolicitacao);
     formData.append('arquivo', arquivo);
 
-    const response = await api.post('/matriculas/comprovante-pix', formData, {
-        baseURL: 'http://localhost:5051/api',
+    const response = await api.post('/api/matriculas/comprovante-pix', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
 }
 
 export async function getMatriculasPendentes() {
-    const response = await api.get('/matriculas/pendentes');
+    const response = await api.get('/api/matriculas/pendentes');
 
     return response.data.map(m => ({
         id: m.id,
@@ -589,7 +583,7 @@ export async function getMatriculasPendentes() {
 }
 
 export async function avaliarMatriculaCoord(id, aprovado, observacao = '') {
-    await api.put(`/matriculas/${id}/avaliar`, {
+    await api.put(`/api/matriculas/${id}/avaliar`, {
         Aprovado: aprovado,
         Observacao: observacao,
     });
@@ -610,23 +604,17 @@ function mapStatusToFront(status) {
 // RECUPERAÇÃO DE SENHA
 // ============================
 export async function solicitarRecuperacaoSenha(email) {
-    const response = await api.post('/auth/esqueci-senha', { email }, {
-        baseURL: 'http://localhost:5051'
-    });
+    const response = await api.post('/auth/esqueci-senha', { email });
     return response.data;
 }
 
 export async function validarOtpSenha(email, codigo) {
-    const response = await api.post('/auth/validar-otp', { email, codigo }, {
-        baseURL: 'http://localhost:5051'
-    });
+    const response = await api.post('/auth/validar-otp', { email, codigo });
     return response.data;
 }
 
 export async function resetarSenha(email, codigo, novaSenha) {
-    const response = await api.post('/auth/resetar-senha', { email, codigo, novaSenha }, {
-        baseURL: 'http://localhost:5051'
-    });
+    const response = await api.post('/auth/resetar-senha', { email, codigo, novaSenha });
     return response.data;
 }
 
