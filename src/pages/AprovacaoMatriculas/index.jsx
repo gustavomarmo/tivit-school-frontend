@@ -116,7 +116,7 @@ export function AprovacaoMatriculas() {
                                     {selectedMatricula.documentos?.length > 0 ? (
                                         selectedMatricula.documentos.map((doc, i) => (
                                             <li key={i}>
-                                                <a href={`http://localhost:5051/${doc.caminho}`} target="_blank" rel="noreferrer" style={{color: 'blue'}}>
+                                                <a href={doc.url} target="_blank" rel="noreferrer" style={{color: 'blue'}}>
                                                     {doc.nomeOriginal ?? doc.tipo}
                                                 </a>
                                             </li>
@@ -137,10 +137,10 @@ export function AprovacaoMatriculas() {
                             <div style={{backgroundColor: '#f9f9f9', padding: 15, borderRadius: 8, marginBottom: 20, textAlign: 'center'}}>
                                 <h4>Comprovante PIX:</h4>
                                 <i className="fa-solid fa-file-invoice-dollar" style={{fontSize: '3rem', color: 'green', margin: '10px 0'}}></i>
-                                {selectedMatricula.documentos?.find(d => d.tipo === 'ComprovantePix') ? (
+                                {selectedMatricula.documentos?.find(d => d.tipo === 'ComprovantePagamento') ? (
                                     <p>
                                         <a 
-                                            href={`http://localhost:5051/${selectedMatricula.documentos.find(d => d.tipo === 'ComprovantePix').caminho}`}
+                                            href={selectedMatricula.documentos.find(d => d.tipo === 'ComprovantePagamento').url}
                                             target="_blank" rel="noreferrer" style={{color: 'blue'}}
                                         >
                                             Ver Comprovante
