@@ -405,7 +405,7 @@ export async function getCoordinatorData() {
         resumo: {
             totalAlunos: d.kpis?.totalAlunos ?? 0,
             totalProfessores: d.kpis?.totalProfessores ?? 0,
-            turmasAtivas: 0,
+            turmasAtivas: d.kpis?.totalTurmas ?? 0,
         },
         desempenhoPorMateria: {
             labels: (d.graficoDesempenho ?? []).map(g => g.label),
