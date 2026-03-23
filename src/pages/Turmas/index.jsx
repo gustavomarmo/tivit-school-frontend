@@ -5,7 +5,7 @@ import {
     deleteTurma,
     getVinculosDaTurma,
     getTeachers,
-    getSubjectsList,
+    getAllDisciplinas,
     vincularDisciplina,
     desvincularDisciplina,
 } from '../../services/api';
@@ -41,16 +41,8 @@ export function Turmas() {
     useEffect(() => {
         carregarTurmas();
         getTeachers().then(setProfessores);
-        getSubjectsList().then(data => {
-            getDisciplinasGenericas().then(setDisciplinas);
-        });
+        getAllDisciplinas().then(setDisciplinas);
     }, []);
-
-    async function getDisciplinasGenericas() {
-        const { default: api } = await import('../../services/axiosInstance');
-        const res = await api.get('/disciplinas');
-        return res.data;
-    }
 
     async function carregarTurmas() {
         setLoading(true);
@@ -232,7 +224,6 @@ export function Turmas() {
             >
                 {turmaVinculos && (
                     <div>
-
                         <div className={styles.vinculosBox}>
                             <h4>Matérias vinculadas</h4>
                             {loadingVinculos ? (
@@ -303,7 +294,6 @@ export function Turmas() {
                                 </div>
                             </form>
                         </div>
-
                     </div>
                 )}
             </Modal>
