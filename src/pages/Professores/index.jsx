@@ -47,9 +47,8 @@ export function Professores() {
             toast('Professor cadastrado com sucesso!', 'success');
             setNovoProf({ matricula: '', nome: '', email: '', disciplina: '', status: 'Ativo' });
             carregarProfessores();
-        } catch (error) {
-            console.error(error);
-            toast('Erro ao cadastrar professor.', 'error');
+        } catch (err) {
+            toast(err.message, 'error');
         }
     }
 
@@ -74,8 +73,8 @@ export function Professores() {
             toast('Professor atualizado com sucesso!', 'success');
             setEditingProf(null);
             carregarProfessores();
-        } catch {
-            toast('Erro ao editar professor.', 'error');
+        } catch (err) {
+            toast(err.message, 'error');
         } finally {
             setSavingEdit(false);
         }

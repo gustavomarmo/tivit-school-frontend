@@ -45,9 +45,8 @@ export function Alunos() {
             toast('Aluno cadastrado com sucesso!', 'success');
             setNovoAluno({ matricula: '', nome: '', email: '', turma: '', status: 'Ativo' });
             carregarAlunos();
-        } catch (error) {
-            console.error(error);
-            toast('Erro ao cadastrar aluno.', 'error');
+        } catch (err) {
+            toast(err.message, 'error');
         }
     }
 
@@ -72,8 +71,8 @@ export function Alunos() {
             toast('Aluno atualizado com sucesso!', 'success');
             setEditingAluno(null);
             carregarAlunos();
-        } catch {
-            toast('Erro ao editar aluno.', 'error');
+        } catch (err) {
+            toast(err.message, 'error');
         } finally {
             setSavingEdit(false);
         }

@@ -31,7 +31,7 @@ export function AprovacaoMatriculas() {
             setSelectedMatricula(null);
             carregarDados();
         } catch (err) {
-            toast(err?.response?.data?.mensagem ?? 'Erro ao aprovar matrícula.', 'error');
+            toast(err.message, 'error');
         }
     }
 
@@ -43,7 +43,7 @@ export function AprovacaoMatriculas() {
                 setSelectedMatricula(null);
                 carregarDados();
             } catch (err) {
-                toast(err?.response?.data?.mensagem ?? 'Erro ao rejeitar matrícula.', 'error');
+                toast(err.message, 'error');
             }
         }
     }

@@ -60,8 +60,8 @@ export function Turmas() {
             toast('Turma criada com sucesso!', 'success');
             setNovaTurma({ nome: '', anoLetivo: new Date().getFullYear() });
             carregarTurmas();
-        } catch {
-            toast('Erro ao criar turma.', 'error');
+        } catch (err) {
+            toast(err.message, 'error');
         } finally {
             setSavingNova(false);
         }
@@ -74,8 +74,8 @@ export function Turmas() {
             await deleteTurma(turma.id);
             setTurmas(prev => prev.filter(t => t.id !== turma.id));
             toast('Turma removida.', 'success');
-        } catch {
-            toast('Erro ao remover turma.', 'error');
+        } catch (err) {
+            toast(err.message, 'error');
         }
     }
 
@@ -112,7 +112,7 @@ export function Turmas() {
             const dados = await getVinculosDaTurma(turmaVinculos.id);
             setVinculos(dados);
         } catch (err) {
-            toast(err?.response?.data?.message ?? 'Erro ao criar vínculo.', 'error');
+            toast(err.message, 'error');
         } finally {
             setSavingVinculo(false);
         }
@@ -125,8 +125,8 @@ export function Turmas() {
             await desvincularDisciplina(vinculo.id);
             setVinculos(prev => prev.filter(v => v.id !== vinculo.id));
             toast('Vínculo removido.', 'success');
-        } catch {
-            toast('Erro ao remover vínculo.', 'error');
+        } catch (err) {
+            toast(err.message, 'error');
         }
     }
 
