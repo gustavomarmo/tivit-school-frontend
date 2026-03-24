@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { getNotifications, getUnreadCount, markNotificationAsRead, markAllNotificationsAsRead} from '../../services/api';
+import { getNotifications, getUnreadCount, markNotificationAsRead, markAllNotificationsAsRead } from '../../services/api';
+import { NOTIFICACAO_ICON } from '../../constants';
 import styles from './NotificationBell.module.css';
 
 export function NotificationBell() {
@@ -41,13 +42,6 @@ export function NotificationBell() {
         loadNotifications();
     }
 
-    const iconMap = {
-        success: 'fa-circle-check',
-        warning: 'fa-triangle-exclamation',
-        info: 'fa-circle-info',
-        error: 'fa-circle-exclamation'
-    };
-
     return (
         <div className={styles.wrapper} ref={dropdownRef}>
             <button className={styles.bellBtn} onClick={() => setIsOpen(prev => !prev)}>
@@ -80,7 +74,7 @@ export function NotificationBell() {
                                     onClick={() => !notif.read && handleMarkAsRead(notif.id)}
                                 >
                                     <div className={`${styles.icon} ${styles[notif.type]}`}>
-                                        <i className={`fa-solid ${iconMap[notif.type] || 'fa-bell'}`}></i>
+                                        <i className={`fa-solid ${NOTIFICACAO_ICON[notif.type] ?? 'fa-bell'}`}></i>
                                     </div>
                                     <div className={styles.content}>
                                         <p className={styles.title}>{notif.title}</p>

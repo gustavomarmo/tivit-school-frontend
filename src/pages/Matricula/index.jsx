@@ -17,6 +17,7 @@ import { Input } from '../../components/Form/Input';
 import { Select } from '../../components/Form/Select';
 import logo from '../../assets/images/Logo Edu Connect.png';
 import styles from './Matricula.module.css';
+import { SERIES_DISPONIVEIS, TURNOS_DISPONIVEIS } from '../../constants';
 
 export function Matricula() {
     const navigate = useNavigate();
@@ -273,15 +274,15 @@ export function Matricula() {
                     <form onSubmit={handlePasso3} className={styles.formGrid}>
                         <Select label="Série Desejada" name="serie" required value={matriculaData.serie} onChange={handleChange}>
                             <option value="">Selecione...</option>
-                            <option value="1º Ano do Ensino Médio">1º Ano do Ensino Médio</option>
-                            <option value="2º Ano do Ensino Médio">2º Ano do Ensino Médio</option>
-                            <option value="3º Ano do Ensino Médio">3º Ano do Ensino Médio</option>
+                            {SERIES_DISPONIVEIS.map(s => (
+                                <option key={s} value={s}>{s}</option>
+                            ))}
                         </Select>
                         <Select label="Turno" name="turno" required value={matriculaData.turno} onChange={handleChange}>
                             <option value="">Selecione...</option>
-                            <option value="Manhã">Manhã</option>
-                            <option value="Tarde">Tarde</option>
-                            <option value="Noite">Noite</option>
+                            {TURNOS_DISPONIVEIS.map(t => (
+                                <option key={t} value={t}>{t}</option>
+                            ))}
                         </Select>
 
                         {matriculaData.mensalidade && (

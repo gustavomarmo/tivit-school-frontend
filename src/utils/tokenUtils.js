@@ -1,8 +1,9 @@
+import { ROLES } from '../constants';
+
 export function decodeToken(token) {
     try {
         const base64Payload = token.split('.')[1];
         const decoded = JSON.parse(atob(base64Payload));
-
         return {
             id: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
             name: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
@@ -16,9 +17,9 @@ export function decodeToken(token) {
 
 export function mapRole(backendRole) {
     const map = {
-        'Aluno': 'aluno',
-        'Professor': 'professor',
-        'Coordenador': 'coordenador'
+        'Aluno': ROLES.ALUNO,
+        'Professor': ROLES.PROFESSOR,
+        'Coordenador': ROLES.COORDENADOR,
     };
-    return map[backendRole] ?? 'aluno';
+    return map[backendRole] ?? ROLES.ALUNO;
 }
