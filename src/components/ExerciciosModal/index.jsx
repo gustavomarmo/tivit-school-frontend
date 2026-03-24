@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '../Button';
 import styles from './ExerciciosModal.module.css';
 import * as pdfjsLib from 'pdfjs-dist';
+import api from '../../services/axiosInstance';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
@@ -10,9 +11,7 @@ function parseQuestions(rawText) {
 
     return blocks.map((block, idx) => {
         const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-
         const questionLine = lines[0].replace(/^Questão\s+\d+[:.]?\s*/i, '').trim();
-
         const optionRegex = /^([a-e])\)\s*(.+)/i;
         const options = lines
             .filter(l => optionRegex.test(l))
@@ -20,7 +19,6 @@ function parseQuestions(rawText) {
                 const m = l.match(optionRegex);
                 return { letter: m[1].toUpperCase(), text: m[2].trim() };
             });
-
         const answerLine = lines.find(l => /^Resposta[:.]?\s*/i.test(l)) || '';
         const answerMatch = answerLine.match(/Resposta[:.]?\s*([a-e])/i);
         const answer = answerMatch ? answerMatch[1].toUpperCase() : null;
@@ -43,105 +41,60 @@ export function ExerciciosModal({ isOpen, onClose, material }) {
 
     if (!isOpen) return null;
 
-        async function handleGenerate() {
-            setLoading(true);
-            setError('');
-            setQuestions([]);
-            setShowAnswers(false);
-            setGenerated(false);
+    async function handleGenerate() {
+        setLoading(true);
+        setError('');
+        setQuestions([]);
+        setShowAnswers(false);
+        setGenerated(false);
 
-            try {
-                let pdfText = '';
+        try {
+            const fileData = material.fileObject instanceof File ? material.fileObject : null;
 
-                const fileData = material.fileObject instanceof File
-                    ? material.fileObject
-                    : null;
-
-                if (!fileData) {
-                    throw new Error('Arquivo PDF não encontrado em memória. Feche e adicione o material novamente.');
-                }
-
-                const arrayBuffer = await fileData.arrayBuffer();
-
-                const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                const maxPages = Math.min(pdfDoc.numPages, 10);
-
-                for (let i = 1; i <= maxPages; i++) {
-                    const page = await pdfDoc.getPage(i);
-                    const content = await page.getTextContent();
-                    const pageText = content.items.map(item => item.str).join(' ');
-                    pdfText += pageText + '\n';
-                }
-
-                if (!pdfText.trim()) {
-                    throw new Error('Não foi possível extrair texto do PDF. O arquivo pode ser uma imagem escaneada.');
-                }
-
-                const truncatedText = pdfText.slice(0, 8000);
-
-                const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-
-                const groqPayload = {
-                    model: 'llama-3.3-70b-versatile',
-                    messages: [
-                        {
-                            role: 'system',
-                            content:
-                                'Você é um professor experiente. Leia o conteúdo do material abaixo e crie exercícios de múltipla escolha de alta qualidade. Responda APENAS com as questões, sem introduções ou despedidas.',
-                        },
-                        {
-                            role: 'user',
-                            content: `Com base no conteúdo abaixo, crie exatamente 5 questões de múltipla escolha (a, b, c, d).
-
-        Formato OBRIGATÓRIO:
-
-        Questão 1: <enunciado>
-        a) <alternativa>
-        b) <alternativa>
-        c) <alternativa>
-        d) <alternativa>
-        Resposta: <letra correta>
-
-        Questão 2: ...
-
-        Conteúdo do material:
-        ${truncatedText}`,
-                        },
-                    ],
-                    temperature: 0.4,
-                    max_tokens: 1800,
-                };
-
-                const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${GROQ_API_KEY}`,
-                    },
-                    body: JSON.stringify(groqPayload),
-                });
-
-                if (!groqRes.ok) {
-                    const errBody = await groqRes.json().catch(() => ({}));
-                    throw new Error(errBody?.error?.message || `Erro Groq: ${groqRes.status}`);
-                }
-
-                const groqData = await groqRes.json();
-                const rawText = groqData.choices?.[0]?.message?.content || '';
-
-                if (!rawText.trim()) throw new Error('A IA não retornou conteúdo. Tente novamente.');
-
-                const parsed = parseQuestions(rawText);
-                if (parsed.length === 0) throw new Error('Não foi possível interpretar as questões geradas.');
-
-                setQuestions(parsed);
-                setGenerated(true);
-            } catch (err) {
-                setError(err.message || 'Ocorreu um erro inesperado.');
-            } finally {
-                setLoading(false);
+            if (!fileData) {
+                throw new Error('Arquivo PDF não encontrado em memória. Feche e adicione o material novamente.');
             }
+
+            const arrayBuffer = await fileData.arrayBuffer();
+            const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const maxPages = Math.min(pdfDoc.numPages, 10);
+
+            let pdfText = '';
+            for (let i = 1; i <= maxPages; i++) {
+                const page = await pdfDoc.getPage(i);
+                const content = await page.getTextContent();
+                pdfText += content.items.map(item => item.str).join(' ') + '\n';
+            }
+
+            if (!pdfText.trim()) {
+                throw new Error('Não foi possível extrair texto do PDF. O arquivo pode ser uma imagem escaneada.');
+            }
+
+            const response = await api.post('/api/exercicios/gerar', {
+                TextoConteudo: pdfText.slice(0, 8000),
+                NomeMaterial: material?.nome ?? '',
+            });
+
+            const rawText = response.data.conteudo;
+
+            if (!rawText?.trim()) {
+                throw new Error('A IA não retornou conteúdo. Tente novamente.');
+            }
+
+            const parsed = parseQuestions(rawText);
+
+            if (parsed.length === 0) {
+                throw new Error('Não foi possível interpretar as questões geradas.');
+            }
+
+            setQuestions(parsed);
+            setGenerated(true);
+        } catch (err) {
+            setError(err.message || 'Ocorreu um erro inesperado.');
+        } finally {
+            setLoading(false);
         }
+    }
 
     return (
         <div className={styles.overlay} onClick={onClose}>
@@ -163,7 +116,6 @@ export function ExerciciosModal({ isOpen, onClose, material }) {
                 </div>
 
                 <div className={styles.body}>
-
                     {!loading && !generated && !error && (
                         <div className={styles.loadingState}>
                             <i className="fa-solid fa-file-circle-question"
@@ -198,42 +150,40 @@ export function ExerciciosModal({ isOpen, onClose, material }) {
                     )}
 
                     {!loading && generated && questions.length > 0 && (
-                        <>
-                            {questions.map(q => (
-                                <div key={q.id} className={styles.questionCard}>
-                                    <div className={styles.questionHeader}>
-                                        <span className={styles.questionBadge}>Q{q.id}</span>
-                                        <p className={styles.questionText}>{q.text}</p>
-                                    </div>
-
-                                    {q.options.length > 0 && (
-                                        <ul className={styles.optionsList}>
-                                            {q.options.map(opt => (
-                                                <li
-                                                    key={opt.letter}
-                                                    className={styles.optionItem}
-                                                    style={
-                                                        showAnswers && q.answer === opt.letter
-                                                            ? { borderColor: '#27ae60', backgroundColor: 'rgba(39,174,96,0.07)' }
-                                                            : {}
-                                                    }
-                                                >
-                                                    <span className={styles.optionLetter}>{opt.letter})</span>
-                                                    <span>{opt.text}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-
-                                    {showAnswers && q.answer && (
-                                        <div className={styles.answerReveal}>
-                                            <i className="fa-solid fa-circle-check"></i>
-                                            Resposta correta: alternativa {q.answer}
-                                        </div>
-                                    )}
+                        questions.map(q => (
+                            <div key={q.id} className={styles.questionCard}>
+                                <div className={styles.questionHeader}>
+                                    <span className={styles.questionBadge}>Q{q.id}</span>
+                                    <p className={styles.questionText}>{q.text}</p>
                                 </div>
-                            ))}
-                        </>
+
+                                {q.options.length > 0 && (
+                                    <ul className={styles.optionsList}>
+                                        {q.options.map(opt => (
+                                            <li
+                                                key={opt.letter}
+                                                className={styles.optionItem}
+                                                style={
+                                                    showAnswers && q.answer === opt.letter
+                                                        ? { borderColor: '#27ae60', backgroundColor: 'rgba(39,174,96,0.07)' }
+                                                        : {}
+                                                }
+                                            >
+                                                <span className={styles.optionLetter}>{opt.letter})</span>
+                                                <span>{opt.text}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+
+                                {showAnswers && q.answer && (
+                                    <div className={styles.answerReveal}>
+                                        <i className="fa-solid fa-circle-check"></i>
+                                        Resposta correta: alternativa {q.answer}
+                                    </div>
+                                )}
+                            </div>
+                        ))
                     )}
                 </div>
 
@@ -261,7 +211,6 @@ export function ExerciciosModal({ isOpen, onClose, material }) {
                         </div>
                     </div>
                 )}
-
             </div>
         </div>
     );
