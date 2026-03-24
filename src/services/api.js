@@ -1,36 +1,5 @@
 import api from './axiosInstance';
 
-/**
- * @param {number} ms
- */
-const simulateNetworkDelay = (ms = 300) => new Promise(res => setTimeout(res, ms));
-
-let _mockStudentData = [
-    { matricula: "2025001", nome: "Ana Silva", turma: "9º Ano A", status: "Ativo" },
-    { matricula: "2025002", nome: "Carlos Santos", turma: "9º Ano A", status: "Ativo" },
-    { matricula: "2025003", nome: "Beatriz Lima", turma: "8º Ano B", status: "Ativo" },
-    { matricula: "2025004", nome: "Daniel Costa", turma: "9º Ano A", status: "Inativo" },
-    { matricula: "2025005", nome: "Elena Rodrigues", turma: "8º Ano B", status: "Ativo" },
-    { matricula: "2025006", nome: "Fernando Alves", turma: "7º Ano C", status: "Ativo" },
-    { matricula: "2025007", nome: "Gabriela Dias", turma: "7º Ano C", status: "Ativo" },
-];
-
-const _mockAbsenceData = [
-    { materia: 'Matemática', frequencia: "95%", faltas: 6 },
-    { materia: 'Português', frequencia: "98%", faltas: 3 },
-    { materia: 'História', frequencia: "95%", faltas: 6 },
-    { materia: 'Geografia', frequencia: "100%", faltas: 0 },
-    { materia: 'Ciências', frequencia: "98%", faltas: 3 },
-    { materia: 'Inglês', frequencia: "100%", faltas: 0 },
-];
-
-let _mockNotifications = [
-    { id: 1, type: 'success', title: 'Nota Lançada', message: 'Nova nota de Matemática (N2) disponível: 8.5', time: '5 min atrás', read: false, timestamp: Date.now() - 5 * 60 * 1000 },
-    { id: 2, type: 'warning', title: 'Prazo de Entrega', message: 'Trabalho de História vence em 2 dias', time: '1 hora atrás', read: false, timestamp: Date.now() - 60 * 60 * 1000 },
-    { id: 3, type: 'info', title: 'Evento Escolar', message: 'Feira de Ciências confirmada para 15/12', time: '3 horas atrás', read: false, timestamp: Date.now() - 3 * 60 * 60 * 1000 },
-    { id: 4, type: 'success', title: 'Material Disponível', message: 'Novo PDF adicionado em Álgebra Linear', time: 'Ontem', read: true, timestamp: Date.now() - 24 * 60 * 60 * 1000 },
-];
-
 // ============================
 // LOGIN USUÁRIO
 // ============================
@@ -85,15 +54,7 @@ export async function deleteStudent(id) {
 }
 
 // ============================
-// CRUD TURMAS
-// ============================
-export async function getClasses() {
-    const response = await api.get('/api/turmas');
-    return response.data;
-}
-
-// ============================
-// CRUD PROFESSORES
+// PROFESSORES
 // ============================
 export async function getTeachers() {
     const response = await api.get('/api/professores');
@@ -139,6 +100,11 @@ export async function deleteTeacher(id) {
 // ============================
 // CRUD TURMAS
 // ============================
+export async function getClasses() {
+    const response = await api.get('/api/turmas');
+    return response.data;
+}
+
 export async function createTurma(turmaData) {
     const response = await api.post('/api/turmas', {
         Nome: turmaData.nome,
@@ -295,11 +261,6 @@ export async function salvarNotasLote(notas) {
 // ============================
 // FREQUÊNCIA
 // ============================
-export async function getFrequenciaResumo() {
-    const response = await api.get('/api/frequencias/resumo');
-    return response.data;
-}
-
 export async function realizarChamada(disciplinaId, data, registros) {
     const response = await api.post('/api/frequencias/chamada', {
         disciplinaId,
@@ -429,7 +390,6 @@ export async function iniciarMatricula(dadosIniciais) {
         Telefone: dadosIniciais.telefone,
         DataNascimento: dadosIniciais.dataNascimento || new Date().toISOString(),
     });
-
     return {
         success: true,
         idSolicitacao: response.data.idSolicitacao,
@@ -442,9 +402,7 @@ export async function validarOtpMatricula(email, otpInserido) {
         Email: email,
         Codigo: otpInserido,
     });
-
     const d = response.data;
-
     const statusToStep = {
         'AguardandoDados': 2,
         'AguardandoAnaliseDocs': 4.5,
@@ -452,7 +410,6 @@ export async function validarOtpMatricula(email, otpInserido) {
         'Finalizado': 6,
         'Rejeitado': 2,
     };
-
     return {
         idSolicitacao: d.idSolicitacao,
         status: d.status,
@@ -488,7 +445,6 @@ export async function uploadDocumentoMatricula(idSolicitacao, tipo, arquivo) {
     formData.append('solicitacaoId', idSolicitacao);
     formData.append('tipo', tipo);
     formData.append('arquivo', arquivo);
-
     const response = await api.post('/api/matriculas/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -497,32 +453,21 @@ export async function uploadDocumentoMatricula(idSolicitacao, tipo, arquivo) {
 
 export async function checarVaga(serie, turno) {
     const response = await api.get('/api/matriculas/vagas-disponiveis');
-
     const vagas = response.data;
-
     const normalizar = (str) =>
         (str ?? '')
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
             .trim()
             .toLowerCase();
-
-    const serieNorm  = normalizar(serie);
-    const turnoNorm  = normalizar(turno);
-
-    const vaga = vagas.find(v => {
-        const vSerieNorm = normalizar(v.serie);
-        const vTurnoNorm = normalizar(v.turno);
-        console.log(`[checarVaga] Comparando: serie "${vSerieNorm}" === "${serieNorm}" | turno "${vTurnoNorm}" === "${turnoNorm}"`);
-        return vSerieNorm === serieNorm && vTurnoNorm === turnoNorm;
-    });
-
-    console.log('[checarVaga] Vaga encontrada:', vaga ?? 'NENHUMA');
-
+    const serieNorm = normalizar(serie);
+    const turnoNorm = normalizar(turno);
+    const vaga = vagas.find(v =>
+        normalizar(v.serie) === serieNorm && normalizar(v.turno) === turnoNorm
+    );
     if (!vaga || !vaga.disponivel) {
         return { disponivel: false, vagasRestantes: vaga?.vagasRestantes ?? 0 };
     }
-
     return { disponivel: true, valor: vaga.valor, vagasRestantes: vaga.vagasRestantes };
 }
 
@@ -533,15 +478,11 @@ export async function selecionarVaga(idSolicitacao, serie, turno) {
         .trim()
         .toLowerCase()
         .replace(/^./, c => c.toUpperCase());
-
-    console.log('[selecionarVaga] Enviando turno normalizado:', turnoNorm, '| serie:', serie);
-
     const response = await api.put('/api/matriculas/selecionar-vaga', {
         SolicitacaoId: idSolicitacao,
         Serie: serie,
         Turno: turnoNorm,
     });
-
     return response.data;
 }
 
@@ -557,7 +498,6 @@ export async function uploadComprovantePix(idSolicitacao, arquivo) {
     const formData = new FormData();
     formData.append('solicitacaoId', idSolicitacao);
     formData.append('arquivo', arquivo);
-
     const response = await api.post('/api/matriculas/comprovante-pix', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -566,7 +506,6 @@ export async function uploadComprovantePix(idSolicitacao, arquivo) {
 
 export async function getMatriculasPendentes() {
     const response = await api.get('/api/matriculas/pendentes');
-
     return response.data.map(m => ({
         id: m.id,
         nome: m.nome,
@@ -616,23 +555,4 @@ export async function validarOtpSenha(email, codigo) {
 export async function resetarSenha(email, codigo, novaSenha) {
     const response = await api.post('/auth/resetar-senha', { email, codigo, novaSenha });
     return response.data;
-}
-
-export async function getAbsenceData() {
-    await simulateNetworkDelay(300);
-    return Promise.resolve(_mockAbsenceData);
-}
-
-export async function saveAttendance(payload) {
-    return new Promise(resolve => {
-        console.log("Frequência enviada:", payload);
-        setTimeout(() => resolve({ success: true }), 500);
-    });
-}
-
-export async function saveGrades(payload) {
-    return new Promise(resolve => {
-        console.log("Notas salvas:", payload);
-        setTimeout(() => resolve({ success: true }), 600);
-    });
 }
