@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
-import { getStudents, addStudent, deleteStudent, editStudent, getClasses} from '../../services/api';
-import { useDialog } from '../../contexts/DialogContext';
+import { useAlunos } from '../../hooks/useAlunos';
 import { Button } from '../../components/Button';
 import { IconButton } from '../../components/IconButton';
 import { Card } from '../../components/Card';
@@ -11,89 +9,25 @@ import { Select } from '../../components/Form/Select';
 import styles from './Alunos.module.css';
 
 export function Alunos() {
-    const { toast, confirm } = useDialog();
-
-    const [alunos, setAlunos] = useState([]);
-    const [turmas, setTurmas] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-
-    const [novoAluno, setNovoAluno] = useState({
-        matricula: '', nome: '', email: '', turmaId: '', status: 'Ativo'
-    });
-
-    const [editingAluno, setEditingAluno] = useState(null);
-    const [editData, setEditData] = useState({ matricula: '', nome: '', turma: '', email: '', status: 'Ativo' });
-    const [savingEdit, setSavingEdit] = useState(false);
-
-    useEffect(() => {
-        carregarAlunos();
-        getClasses().then(setTurmas);
-    }, []);
-
-    async function carregarAlunos() {
-        setLoading(true);
-        const dados = await getStudents();
-        setAlunos(dados);
-        setLoading(false);
-    }
-
-    async function handleAddStudent(e) {
-        e.preventDefault();
-        try {
-            await addStudent(novoAluno);
-            toast('Aluno cadastrado com sucesso!', 'success');
-            setNovoAluno({ matricula: '', nome: '', email: '', turma: '', status: 'Ativo' });
-            carregarAlunos();
-        } catch (err) {
-            toast(err.message, 'error');
-        }
-    }
-
-    async function handleDelete(aluno) {
-        const ok = await confirm(`Remover o aluno "${aluno.nome}"? Esta ação não pode ser desfeita.`);
-        if (!ok) return;
-        await deleteStudent(aluno.id);
-        setAlunos(prev => prev.filter(a => a.id !== aluno.id));
-        toast('Aluno removido.', 'success');
-    }
-
-    function openEdit(aluno) {
-        setEditingAluno(aluno);
-        setEditData({ matricula: aluno.matricula, nome: aluno.nome || '', email: aluno.email || '', turmaId: aluno.turmaId || '', status: aluno.status || 'Ativo'});
-    }
-
-    async function handleSaveEdit(e) {
-        e.preventDefault();
-        setSavingEdit(true);
-        try {
-            await editStudent(editingAluno.id, editData);
-            toast('Aluno atualizado com sucesso!', 'success');
-            setEditingAluno(null);
-            carregarAlunos();
-        } catch (err) {
-            toast(err.message, 'error');
-        } finally {
-            setSavingEdit(false);
-        }
-    }
-
-    const alunosFiltrados = alunos.filter(aluno =>
-        aluno.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        aluno.matricula.includes(searchTerm)
-    );
+    const {
+        alunosFiltrados, turmas, loading, searchTerm, setSearchTerm,
+        novoAluno, setNovoAluno, handleAddStudent,
+        handleDelete,
+        editingAluno, setEditingAluno, editData, setEditData,
+        savingEdit, openEdit, handleSaveEdit,
+    } = useAlunos();
 
     return (
         <div className={styles.container}>
             <h1>Gestão de Alunos</h1>
 
-            <Card className={styles.filterCard}>
+            <Card>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
                     <div style={{ flexGrow: 1 }}>
                         <Input
                             placeholder="Filtrar por nome, matrícula..."
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={e => setSearchTerm(e.target.value)}
                         />
                     </div>
                     <Button onClick={() => document.getElementById('section-cadastro').scrollIntoView({ behavior: 'smooth' })}>
@@ -104,7 +38,7 @@ export function Alunos() {
 
             <Table headers={['Matrícula', 'Nome', 'Turma', 'E-mail', 'Status', 'Ações']}>
                 {loading ? (
-                    <tr><td colSpan="5" align="center">Carregando...</td></tr>
+                    <tr><td colSpan="6" align="center">Carregando...</td></tr>
                 ) : alunosFiltrados.map(aluno => (
                     <tr key={aluno.matricula}>
                         <td>{aluno.matricula}</td>
@@ -118,17 +52,8 @@ export function Alunos() {
                         </td>
                         <td>
                             <div style={{ display: 'flex', gap: '4px' }}>
-                                <IconButton
-                                    icon="fa-pen"
-                                    title="Editar aluno"
-                                    onClick={() => openEdit(aluno)}
-                                />
-                                <IconButton
-                                    icon="fa-trash"
-                                    title="Remover aluno"
-                                    variant="danger"
-                                    onClick={() => handleDelete(aluno)}
-                                />
+                                <IconButton icon="fa-pen" title="Editar aluno" onClick={() => openEdit(aluno)} />
+                                <IconButton icon="fa-trash" title="Remover aluno" variant="danger" onClick={() => handleDelete(aluno)} />
                             </div>
                         </td>
                     </tr>
@@ -138,34 +63,21 @@ export function Alunos() {
             <Modal isOpen={!!editingAluno} onClose={() => setEditingAluno(null)} title={`Editar: ${editingAluno?.nome}`}>
                 <form onSubmit={handleSaveEdit}>
                     <div style={{ display: 'grid', gap: '15px' }}>
-                        <Input
-                            label="Nome Completo"
-                            required
-                            autoFocus
+                        <Input label="Nome Completo" required autoFocus
                             value={editData.nome}
-                            onChange={e => setEditData({ ...editData, nome: e.target.value })}
-                        />
-                        <Input
-                            label="E-mail"
-                            type="email"
-                            required
+                            onChange={e => setEditData({ ...editData, nome: e.target.value })} />
+                        <Input label="E-mail" type="email" required
                             value={editData.email}
-                            onChange={e => setEditData({ ...editData, email: e.target.value })}
-                        />
-                        <Select
-                            label="Turma"
-                            required
+                            onChange={e => setEditData({ ...editData, email: e.target.value })} />
+                        <Select label="Turma" required
                             value={editData.turmaId}
-                            onChange={e => setEditData({ ...editData, turmaId: e.target.value })}
-                        >
+                            onChange={e => setEditData({ ...editData, turmaId: e.target.value })}>
                             <option value="">Selecione...</option>
                             {turmas.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
                         </Select>
-                        <Select
-                            label="Status"
+                        <Select label="Status"
                             value={editData.status}
-                            onChange={e => setEditData({ ...editData, status: e.target.value })}
-                        >
+                            onChange={e => setEditData({ ...editData, status: e.target.value })}>
                             <option value="Ativo">Ativo</option>
                             <option value="Inativo">Inativo</option>
                         </Select>
@@ -184,47 +96,28 @@ export function Alunos() {
                 <Card title="Cadastrar Novo Aluno">
                     <form onSubmit={handleAddStudent}>
                         <div className={styles.formGrid}>
-                            <Input
-                                label="Matrícula"
-                                placeholder="Ex: ABC1234"
-                                required
+                            <Input label="Matrícula" placeholder="Ex: ABC1234" required
                                 value={novoAluno.matricula}
-                                onChange={e => setNovoAluno({ ...novoAluno, matricula: e.target.value })}
-                            />
-                            <Input
-                                label="Nome Completo"
-                                placeholder="Ex: Gustavo Marmo"
-                                required
+                                onChange={e => setNovoAluno({ ...novoAluno, matricula: e.target.value })} />
+                            <Input label="Nome Completo" placeholder="Ex: Gustavo Marmo" required
                                 value={novoAluno.nome}
-                                onChange={e => setNovoAluno({ ...novoAluno, nome: e.target.value })}
-                            />
-                            <Input
-                                label="E-mail"
-                                type="email"
-                                placeholder="Ex: aluno@escola.com"
-                                required
+                                onChange={e => setNovoAluno({ ...novoAluno, nome: e.target.value })} />
+                            <Input label="E-mail" type="email" placeholder="Ex: aluno@escola.com" required
                                 value={novoAluno.email}
-                                onChange={e => setNovoAluno({ ...novoAluno, email: e.target.value })}
-                            />
-                           <Select
-                                label="Turma"
-                                required
+                                onChange={e => setNovoAluno({ ...novoAluno, email: e.target.value })} />
+                            <Select label="Turma" required
                                 value={novoAluno.turmaId}
-                                onChange={e => setNovoAluno({ ...novoAluno, turmaId: e.target.value })}
-                            >
+                                onChange={e => setNovoAluno({ ...novoAluno, turmaId: e.target.value })}>
                                 <option value="">Selecione...</option>
                                 {turmas.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
                             </Select>
-                            <Select
-                                label="Status"
+                            <Select label="Status"
                                 value={novoAluno.status}
-                                onChange={e => setNovoAluno({ ...novoAluno, status: e.target.value })}
-                            >
+                                onChange={e => setNovoAluno({ ...novoAluno, status: e.target.value })}>
                                 <option value="Ativo">Ativo</option>
                                 <option value="Inativo">Inativo</option>
                             </Select>
                         </div>
-
                         <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
                             <Button type="submit">
                                 <i className="fa-solid fa-check"></i> Salvar Aluno
