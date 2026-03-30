@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎓 Edu Connect
+# 🎓 Tivit School
 
 **Plataforma escolar completa para gestão acadêmica, matrícula digital e comunicação entre alunos, professores e coordenação.**
 
