@@ -13,7 +13,7 @@ function TabelaBoletim({ notas }) {
                         <th rowSpan="2" style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #ccc' }}>Matéria</th>
                         <th colSpan="4" className={styles.headerGroup} style={{ backgroundColor: '#e74c3c' }}>1º Bimestre</th>
                         <th colSpan="4" className={styles.headerGroup} style={{ backgroundColor: '#c0392b' }}>2º Bimestre</th>
-                        <th rowSpan="2" style={{ padding: '10px', borderBottom: '1px solid #ccc', textAlign: 'center' }}>Média Anual</th>
+                        <th rowSpan="2" style={{ padding: '10px', borderBottom: '1px solid #ccc', textAlign: 'center' }}>Média Semestral</th>
                     </tr>
                     <tr style={{ backgroundColor: '#f4f4f4', fontSize: '0.9rem' }}>
                         <th>N1</th><th>N2</th><th>Ativ.</th><th>Média</th>
