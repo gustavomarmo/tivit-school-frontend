@@ -102,9 +102,6 @@ export function Alunos() {
                             <Input label="Nome Completo" placeholder="Ex: Gustavo Marmo" required
                                 value={novoAluno.nome}
                                 onChange={e => setNovoAluno({ ...novoAluno, nome: e.target.value })} />
-                            <Input label="E-mail" type="email" placeholder="Ex: aluno@escola.com" required
-                                value={novoAluno.email}
-                                onChange={e => setNovoAluno({ ...novoAluno, email: e.target.value })} />
                             <Select label="Turma" required
                                 value={novoAluno.turmaId}
                                 onChange={e => setNovoAluno({ ...novoAluno, turmaId: e.target.value })}>
