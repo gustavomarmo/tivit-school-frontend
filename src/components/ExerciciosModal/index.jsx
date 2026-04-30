@@ -7,7 +7,9 @@ import api from '../../services/axiosInstance';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 function parseQuestions(rawText) {
-    const blocks = rawText.split(/(?=Questão\s+\d+[:.]?)/i).filter(b => b.trim());
+    const blocks = rawText
+        .split(/(?=Questão\s+\d+[:.]?)/i)
+        .filter(b => b.trim() && /^Questão\s+\d+/i.test(b.trim()));
 
     return blocks.map((block, idx) => {
         const lines = block.split('\n').map(l => l.trim()).filter(Boolean);

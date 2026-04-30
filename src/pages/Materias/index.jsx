@@ -417,7 +417,7 @@ export function Materias() {
                                 <i className="fa-solid fa-external-link"></i> Acessar Conteúdo
                             </Button>
                         ) : viewContent.type === 'file' ? (
-                            <Button onClick={() => toast('Download iniciado!', 'info')}>
+                            <Button onClick={() => window.open(viewContent.url, '_blank')}>
                                 <i className="fa-solid fa-download"></i> Baixar Arquivo
                             </Button>
                         ) : (
