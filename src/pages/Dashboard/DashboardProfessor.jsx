@@ -49,6 +49,18 @@ export function DashboardProfessor() {
                         <i className="fa-solid fa-graduation-cap"></i>
                         <span>{dados.resumo.totalAlunos} Alunos</span>
                     </div>
+                    <Link to="/calendario" className={styles.opcaoItem}>
+                        <i className="fa-solid fa-calendar"></i>
+                        <span>Calendário</span>
+                    </Link>
+                    <Link to="/materias" className={styles.opcaoItem}>
+                        <i className="fa-solid fa-file-pen"></i>
+                        <span>Matérias</span>
+                    </Link>
+                    <Link to="/frequencia" className={styles.opcaoItem}>
+                        <i className="fa-solid fa-chart-simple"></i>
+                        <span>Lançar Frequência</span>
+                    </Link>
                     <Link to="/notas" className={styles.opcaoItem} style={{backgroundColor: 'var(--brand-secondary)'}}>
                         <i className="fa-solid fa-pen-to-square"></i>
                         <span>Lançar Notas</span>
