@@ -106,9 +106,6 @@ export function Professores() {
                             <Input label="Disciplina" placeholder="Ex: Matemática" required
                                 value={novoProf.disciplina}
                                 onChange={e => setNovoProf({ ...novoProf, disciplina: e.target.value })} />
-                            <Input label="E-mail" type="email" placeholder="Ex: professor@escola.com" required
-                                value={novoProf.email}
-                                onChange={e => setNovoProf({ ...novoProf, email: e.target.value })} />
                             <Select label="Status"
                                 value={novoProf.status}
                                 onChange={e => setNovoProf({ ...novoProf, status: e.target.value })}>
